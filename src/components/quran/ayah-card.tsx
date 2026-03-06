@@ -1,7 +1,9 @@
+import { useMemo } from "react";
 import { Play, Pause, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { parseTajweedMarkup } from "@/lib/tajweed-parser";
 import type { Ayah } from "@/types/quran";
 
 interface AyahCardProps {
@@ -24,6 +26,10 @@ export function AyahCard({
   tajweedText,
 }: AyahCardProps) {
   const isActive = isCurrentlyPlaying || isLoading;
+  const tajweedHtml = useMemo(
+    () => (tajweedText ? parseTajweedMarkup(tajweedText) : null),
+    [tajweedText],
+  );
 
   return (
     <Card
@@ -75,13 +81,13 @@ export function AyahCard({
             )}
           </Button>
         </div>
-        {tajweedText ? (
+        {tajweedHtml ? (
           <p
             className="flex-1 text-right font-arabic text-2xl leading-[2.5] md:text-3xl"
             dir="rtl"
             lang="ar"
             data-tajweed=""
-            dangerouslySetInnerHTML={{ __html: tajweedText }}
+            dangerouslySetInnerHTML={{ __html: tajweedHtml }}
           />
         ) : (
           <p
