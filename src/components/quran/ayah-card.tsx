@@ -11,6 +11,7 @@ interface AyahCardProps {
   isLoading: boolean;
   onPlay: (index: number) => void;
   onTogglePlayPause: () => void;
+  tajweedText?: string;
 }
 
 export function AyahCard({
@@ -20,6 +21,7 @@ export function AyahCard({
   isLoading,
   onPlay,
   onTogglePlayPause,
+  tajweedText,
 }: AyahCardProps) {
   const isActive = isCurrentlyPlaying || isLoading;
 
@@ -73,13 +75,23 @@ export function AyahCard({
             )}
           </Button>
         </div>
-        <p
-          className="flex-1 text-right font-arabic text-2xl leading-[2.5] md:text-3xl"
-          dir="rtl"
-          lang="ar"
-        >
-          {ayah.text}
-        </p>
+        {tajweedText ? (
+          <p
+            className="flex-1 text-right font-arabic text-2xl leading-[2.5] md:text-3xl"
+            dir="rtl"
+            lang="ar"
+            data-tajweed=""
+            dangerouslySetInnerHTML={{ __html: tajweedText }}
+          />
+        ) : (
+          <p
+            className="flex-1 text-right font-arabic text-2xl leading-[2.5] md:text-3xl"
+            dir="rtl"
+            lang="ar"
+          >
+            {ayah.text}
+          </p>
+        )}
       </div>
     </Card>
   );

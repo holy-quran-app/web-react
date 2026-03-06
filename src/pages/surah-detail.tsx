@@ -5,13 +5,15 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useSurah } from "@/hooks/use-surah";
+import { useTajweed } from "@/hooks/use-tajweed";
 import { useRecitation } from "@/hooks/use-recitation";
 import { AyahCard } from "@/components/quran/ayah-card";
 import { RecitationPlayer } from "@/components/quran/recitation-player";
 
 export function SurahDetailPage() {
   const { number } = useParams<{ number: string }>();
-  const { surah, loading } = useSurah(number);
+  const { tajweedEnabled, setTajweedEnabled } = useTajweed();
+  const { surah, tajweedTexts, loading } = useSurah(number, tajweedEnabled);
 
   const surahNumber = Number(number);
   const ayahs = surah?.ayahs ?? [];
@@ -67,7 +69,7 @@ export function SurahDetailPage() {
             {surah.englishNameTranslation} &middot; {surah.numberOfAyahs} Ayahs
             &middot; {surah.revelationType}
           </p>
-          <div className="flex gap-2 pt-2">
+          <div className="flex items-center gap-2 pt-2">
             {surahNumber > 1 && (
               <Button variant="outline" size="sm" asChild>
                 <Link to={`/surah/${surahNumber - 1}`}>Previous Surah</Link>
@@ -78,6 +80,16 @@ export function SurahDetailPage() {
                 <Link to={`/surah/${surahNumber + 1}`}>Next Surah</Link>
               </Button>
             )}
+            <Button
+              variant={tajweedEnabled ? "default" : "outline"}
+              size="sm"
+              onClick={() => setTajweedEnabled(!tajweedEnabled)}
+              aria-label={tajweedEnabled ? "Disable Tajweed colors" : "Enable Tajweed colors"}
+              className="gap-1.5"
+            >
+              <TajweedIcon className="size-4" />
+              Tajweed
+            </Button>
           </div>
         </div>
 
@@ -117,6 +129,11 @@ export function SurahDetailPage() {
                   }
                   onPlay={recitation.playAyah}
                   onTogglePlayPause={recitation.togglePlayPause}
+                  tajweedText={
+                    tajweedEnabled
+                      ? tajweedTexts?.get(ayah.numberInSurah)
+                      : undefined
+                  }
                 />
               </div>
             ))}
@@ -156,5 +173,28 @@ export function SurahDetailPage() {
         onReciterChange={recitation.setReciter}
       />
     </div>
+  );
+}
+
+function TajweedIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="M12 2v4" />
+      <path d="m6.8 15-3.5 2" />
+      <path d="m20.7 17-3.5-2" />
+      <path d="M6.5 8.5c1.6-1.6 4-2.2 6.2-1.5" />
+      <circle cx="12" cy="12" r="3" />
+      <path d="M12 15v4" />
+      <circle cx="12" cy="12" r="8" strokeDasharray="4 2" />
+    </svg>
   );
 }

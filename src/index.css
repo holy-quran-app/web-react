@@ -106,3 +106,91 @@
     font-family: var(--font-sans);
   }
 }
+
+/* Tajweed color rules - standard tajweed color coding */
+[data-tajweed] .ham_wasl {
+  color: hsl(210 80% 50%); /* Hamzatul Wasl - blue */
+}
+[data-tajweed] .lpieces_letter {
+  color: hsl(210 80% 50%); /* Lam Shamsiyya - blue */
+}
+[data-tajweed] .slnt {
+  color: hsl(210 10% 55%); /* Silent letter - grey */
+}
+[data-tajweed] .madda_normal {
+  color: hsl(25 90% 50%); /* Normal Madd - orange */
+}
+[data-tajweed] .madda_permissible {
+  color: hsl(150 65% 35%); /* Permissible Madd - green */
+}
+[data-tajweed] .madda_necessary {
+  color: hsl(0 75% 50%); /* Obligatory Madd - red */
+}
+[data-tajweed] .madda_obligatory {
+  color: hsl(0 75% 50%); /* Obligatory Madd - red */
+}
+[data-tajweed] .qlq {
+  color: hsl(300 55% 50%); /* Qalqala - purple */
+}
+[data-tajweed] .imark_n {
+  color: hsl(25 90% 50%); /* Idgham (no ghunna) - orange */
+}
+[data-tajweed] .imark {
+  color: hsl(150 65% 35%); /* Idgham - green */
+}
+[data-tajweed] .ghunnah {
+  color: hsl(150 65% 35%); /* Ghunna - green */
+}
+[data-tajweed] .idghaam_shafawi {
+  color: hsl(150 65% 35%); /* Idgham Shafawi - green */
+}
+[data-tajweed] .ikhpieces_shafawi {
+  color: hsl(25 90% 50%); /* Ikhfa Shafawi - orange */
+}
+[data-tajweed] .ikhpieces {
+  color: hsl(25 90% 50%); /* Ikhfa - orange */
+}
+
+/* Dark mode adjustments for better contrast */
+.dark [data-tajweed] .ham_wasl {
+  color: hsl(210 90% 65%);
+}
+.dark [data-tajweed] .lpieces_letter {
+  color: hsl(210 90% 65%);
+}
+.dark [data-tajweed] .slnt {
+  color: hsl(210 10% 60%);
+}
+.dark [data-tajweed] .madda_normal {
+  color: hsl(25 95% 60%);
+}
+.dark [data-tajweed] .madda_permissible {
+  color: hsl(150 70% 50%);
+}
+.dark [data-tajweed] .madda_necessary {
+  color: hsl(0 80% 60%);
+}
+.dark [data-tajweed] .madda_obligatory {
+  color: hsl(0 80% 60%);
+}
+.dark [data-tajweed] .qlq {
+  color: hsl(300 65% 65%);
+}
+.dark [data-tajweed] .imark_n {
+  color: hsl(25 95% 60%);
+}
+.dark [data-tajweed] .imark {
+  color: hsl(150 70% 50%);
+}
+.dark [data-tajweed] .ghunnah {
+  color: hsl(150 70% 50%);
+}
+.dark [data-tajweed] .idghaam_shafawi {
+  color: hsl(150 70% 50%);
+}
+.dark [data-tajweed] .ikhpieces_shafawi {
+  color: hsl(25 95% 60%);
+}
+.dark [data-tajweed] .ikhpieces {
+  color: hsl(25 95% 60%);
+}
