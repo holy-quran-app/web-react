@@ -14,6 +14,8 @@ export interface Ayah {
   juz: number;
   page: number;
   hizbQuarter: number;
+  audio?: string;
+  audioSecondary?: string[];
 }
 
 export interface SurahDetail extends Surah {
@@ -27,4 +29,9 @@ export interface Edition {
   englishName: string;
   format: "text" | "audio";
   type: "quran" | "translation" | "transliteration" | "tafsir";
+}
+
+export interface Reciter {
+  identifier: string;
+  name: string;
 }
