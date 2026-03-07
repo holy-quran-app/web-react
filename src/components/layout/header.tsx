@@ -1,9 +1,11 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/use-theme";
+import { usePinnedAyah } from "@/hooks/use-pinned-ayah";
 
 export function Header() {
   const { theme, setTheme } = useTheme();
+  const { pinnedAyah } = usePinnedAyah();
 
   const toggleTheme = () => {
     setTheme(theme === "dark" ? "light" : "dark");
@@ -33,6 +35,17 @@ export function Header() {
           <Button variant="ghost" size="sm" asChild>
             <Link to="/surah">Surahs</Link>
           </Button>
+          {pinnedAyah && (
+            <Button variant="ghost" size="sm" asChild>
+              <Link
+                to={`/surah/${pinnedAyah.surahNumber}`}
+                title={`Continue reading: ${pinnedAyah.surahName} - Ayah ${pinnedAyah.ayahNumberInSurah}`}
+              >
+                <BookmarkIcon className="h-4 w-4 mr-1" />
+                <span className="hidden sm:inline">Continue Reading</span>
+              </Link>
+            </Button>
+          )}
           <Button
             variant="ghost"
             size="icon"
@@ -89,6 +102,23 @@ function MoonIcon({ className }: { className?: string }) {
       className={className}
     >
       <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+    </svg>
+  );
+}
+
+function BookmarkIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" />
     </svg>
   );
 }
