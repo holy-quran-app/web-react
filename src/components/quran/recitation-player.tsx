@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Play,
   Pause,
@@ -6,6 +7,8 @@ import {
   SkipForward,
   Loader2,
   Volume2,
+  Repeat,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,6 +18,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { RECITERS } from "@/hooks/use-recitation";
+import type { RangeRepeatConfig } from "@/hooks/use-recitation";
 import type { Reciter } from "@/types/quran";
 
 interface RecitationPlayerProps {
@@ -25,11 +29,14 @@ interface RecitationPlayerProps {
   progress: number;
   duration: number;
   reciter: Reciter;
+  rangeRepeat: RangeRepeatConfig;
   onPlaySurah: () => void;
   onTogglePlayPause: () => void;
   onStop: () => void;
   onPlayAyah: (index: number) => void;
   onReciterChange: (reciter: Reciter) => void;
+  onRangeRepeatChange: (config: Partial<RangeRepeatConfig>) => void;
+  onClearRange: () => void;
 }
 
 function formatTime(seconds: number): string {
@@ -46,14 +53,21 @@ export function RecitationPlayer({
   progress,
   duration,
   reciter,
+  rangeRepeat,
   onPlaySurah,
   onTogglePlayPause,
   onStop,
   onPlayAyah,
   onReciterChange,
+  onRangeRepeatChange,
+  onClearRange,
 }: RecitationPlayerProps) {
   const isActive = currentAyahIndex !== null;
   const progressPercent = duration > 0 ? (progress / duration) * 100 : 0;
+  const [showRangePanel, setShowRangePanel] = useState(false);
+
+  const hasRange =
+    rangeRepeat.startIndex !== null && rangeRepeat.endIndex !== null;
 
   return (
     <div className="sticky bottom-0 z-40 border-t bg-card/95 backdrop-blur-sm supports-[backdrop-filter]:bg-card/80">
@@ -117,7 +131,9 @@ export function RecitationPlayer({
                           ? "Pause"
                           : isActive
                             ? "Resume"
-                            : "Play Surah"
+                            : hasRange
+                              ? "Play Range"
+                              : "Play Surah"
                     }
                   >
                     {isLoading ? (
@@ -136,7 +152,9 @@ export function RecitationPlayer({
                       ? "Pause"
                       : isActive
                         ? "Resume"
-                        : "Play Surah"}
+                        : hasRange
+                          ? "Play Range"
+                          : "Play Surah"}
                 </TooltipContent>
               </Tooltip>
 
@@ -178,6 +196,21 @@ export function RecitationPlayer({
                 </TooltipTrigger>
                 <TooltipContent>Stop</TooltipContent>
               </Tooltip>
+
+              {/* Range/Repeat toggle */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant={hasRange ? "default" : "ghost"}
+                    size="icon-sm"
+                    onClick={() => setShowRangePanel(!showRangePanel)}
+                    aria-label="Repeat range settings"
+                  >
+                    <Repeat className="size-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Repeat Range</TooltipContent>
+              </Tooltip>
             </TooltipProvider>
           </div>
 
@@ -200,8 +233,107 @@ export function RecitationPlayer({
                 </span>
               </>
             )}
+            {!isActive && hasRange && (
+              <span className="text-xs text-muted-foreground">
+                Range: Ayah {rangeRepeat.startIndex! + 1} &ndash;{" "}
+                {rangeRepeat.endIndex! + 1} &middot; {rangeRepeat.repeatCount}x
+              </span>
+            )}
           </div>
         </div>
+
+        {/* Range & Repeat panel */}
+        {showRangePanel && (
+          <div className="mt-3 flex flex-wrap items-center gap-3 border-t pt-3">
+            <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              From Ayah
+              <input
+                type="number"
+                min={1}
+                max={totalAyahs}
+                value={
+                  rangeRepeat.startIndex !== null
+                    ? rangeRepeat.startIndex + 1
+                    : ""
+                }
+                placeholder="1"
+                onChange={(e) => {
+                  const v = e.target.value;
+                  if (v === "") {
+                    onRangeRepeatChange({ startIndex: null });
+                  } else {
+                    const num = Math.max(
+                      0,
+                      Math.min(totalAyahs - 1, Number(v) - 1),
+                    );
+                    onRangeRepeatChange({ startIndex: num });
+                  }
+                }}
+                className="h-7 w-16 rounded-md border border-input bg-background px-2 text-center text-sm tabular-nums text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                aria-label="Range start ayah"
+              />
+            </label>
+            <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              To Ayah
+              <input
+                type="number"
+                min={1}
+                max={totalAyahs}
+                value={
+                  rangeRepeat.endIndex !== null
+                    ? rangeRepeat.endIndex + 1
+                    : ""
+                }
+                placeholder={String(totalAyahs)}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  if (v === "") {
+                    onRangeRepeatChange({ endIndex: null });
+                  } else {
+                    const num = Math.max(
+                      0,
+                      Math.min(totalAyahs - 1, Number(v) - 1),
+                    );
+                    onRangeRepeatChange({ endIndex: num });
+                  }
+                }}
+                className="h-7 w-16 rounded-md border border-input bg-background px-2 text-center text-sm tabular-nums text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                aria-label="Range end ayah"
+              />
+            </label>
+            <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              Repeat
+              <input
+                type="number"
+                min={1}
+                max={99}
+                value={rangeRepeat.repeatCount}
+                onChange={(e) => {
+                  const num = Math.max(1, Math.min(99, Number(e.target.value)));
+                  onRangeRepeatChange({ repeatCount: num });
+                }}
+                className="h-7 w-14 rounded-md border border-input bg-background px-2 text-center text-sm tabular-nums text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                aria-label="Repeat count"
+              />
+              <span>times</span>
+            </label>
+            {hasRange && (
+              <>
+                <span className="text-xs font-medium text-primary">
+                  {rangeRepeat.currentRepeat}/{rangeRepeat.repeatCount}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="icon-xs"
+                  onClick={onClearRange}
+                  aria-label="Clear range"
+                >
+                  <X className="size-3.5" />
+                </Button>
+              </>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

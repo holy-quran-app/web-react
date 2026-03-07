@@ -134,6 +134,12 @@ export function SurahDetailPage() {
                       ? tajweedTexts?.get(ayah.numberInSurah)
                       : undefined
                   }
+                  isInRange={
+                    recitation.rangeRepeat.startIndex !== null &&
+                    recitation.rangeRepeat.endIndex !== null &&
+                    index >= recitation.rangeRepeat.startIndex &&
+                    index <= recitation.rangeRepeat.endIndex
+                  }
                 />
               </div>
             ))}
@@ -166,11 +172,14 @@ export function SurahDetailPage() {
         progress={recitation.progress}
         duration={recitation.duration}
         reciter={recitation.reciter}
+        rangeRepeat={recitation.rangeRepeat}
         onPlaySurah={recitation.playSurah}
         onTogglePlayPause={recitation.togglePlayPause}
         onStop={recitation.stop}
         onPlayAyah={recitation.playAyah}
         onReciterChange={recitation.setReciter}
+        onRangeRepeatChange={recitation.setRangeRepeat}
+        onClearRange={recitation.clearRange}
       />
     </div>
   );
