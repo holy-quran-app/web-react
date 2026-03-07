@@ -12,6 +12,13 @@ export const RECITERS: Reciter[] = [
   { identifier: "ar.muhammadjibreel", name: "Muhammad Jibreel" },
 ];
 
+export interface RangeRepeatConfig {
+  startIndex: number | null;
+  endIndex: number | null;
+  repeatCount: number;
+  currentRepeat: number;
+}
+
 interface RecitationState {
   currentAyahIndex: number | null;
   isPlaying: boolean;
@@ -19,6 +26,7 @@ interface RecitationState {
   progress: number;
   duration: number;
   reciter: Reciter;
+  rangeRepeat: RangeRepeatConfig;
 }
 
 const STORAGE_KEY = "holy-quran-reciter";
@@ -67,9 +75,17 @@ function attachAudioListeners(
   audio.addEventListener("error", onError);
 }
 
+const defaultRangeRepeat: RangeRepeatConfig = {
+  startIndex: null,
+  endIndex: null,
+  repeatCount: 1,
+  currentRepeat: 0,
+};
+
 export function useRecitation(surahNumber: number, ayahs: Ayah[]) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const playAyahRef = useRef<(index: number) => void>(() => {});
+  const rangeRepeatRef = useRef<RangeRepeatConfig>(defaultRangeRepeat);
   const [state, setState] = useState<RecitationState>({
     currentAyahIndex: null,
     isPlaying: false,
@@ -77,7 +93,13 @@ export function useRecitation(surahNumber: number, ayahs: Ayah[]) {
     progress: 0,
     duration: 0,
     reciter: getSavedReciter(),
+    rangeRepeat: defaultRangeRepeat,
   });
+
+  // Keep ref in sync with state
+  useEffect(() => {
+    rangeRepeatRef.current = state.rangeRepeat;
+  }, [state.rangeRepeat]);
 
   const stop = useCallback(() => {
     if (audioRef.current) {
@@ -138,11 +160,50 @@ export function useRecitation(surahNumber: number, ayahs: Ayah[]) {
           }));
         },
         onEnded: () => {
-          const nextIndex = index + 1;
-          if (nextIndex < ayahs.length) {
-            playAyahRef.current(nextIndex);
+          const rr = rangeRepeatRef.current;
+          const hasRange =
+            rr.startIndex !== null && rr.endIndex !== null;
+
+          if (hasRange) {
+            const rangeEnd = rr.endIndex!;
+            const rangeStart = rr.startIndex!;
+
+            if (index < rangeEnd) {
+              // Continue to next ayah in range
+              playAyahRef.current(index + 1);
+            } else {
+              // Reached end of range
+              const nextRepeat = rr.currentRepeat + 1;
+              if (nextRepeat < rr.repeatCount) {
+                // Start the range again
+                setState((prev) => ({
+                  ...prev,
+                  rangeRepeat: {
+                    ...prev.rangeRepeat,
+                    currentRepeat: nextRepeat,
+                  },
+                }));
+                playAyahRef.current(rangeStart);
+              } else {
+                // All repeats done, reset counter and stop
+                setState((prev) => ({
+                  ...prev,
+                  rangeRepeat: {
+                    ...prev.rangeRepeat,
+                    currentRepeat: 0,
+                  },
+                }));
+                stop();
+              }
+            }
           } else {
-            stop();
+            // No range set - normal sequential play
+            const nextIndex = index + 1;
+            if (nextIndex < ayahs.length) {
+              playAyahRef.current(nextIndex);
+            } else {
+              stop();
+            }
           }
         },
         onError: () => {
@@ -185,7 +246,17 @@ export function useRecitation(surahNumber: number, ayahs: Ayah[]) {
   }, []);
 
   const playSurah = useCallback(() => {
-    playAyah(0);
+    const rr = rangeRepeatRef.current;
+    if (rr.startIndex !== null && rr.endIndex !== null) {
+      // Reset repeat counter and start from range start
+      setState((prev) => ({
+        ...prev,
+        rangeRepeat: { ...prev.rangeRepeat, currentRepeat: 0 },
+      }));
+      playAyah(rr.startIndex);
+    } else {
+      playAyah(0);
+    }
   }, [playAyah]);
 
   const setReciter = useCallback(
@@ -223,6 +294,23 @@ export function useRecitation(surahNumber: number, ayahs: Ayah[]) {
     [startAudio],
   );
 
+  const setRangeRepeat = useCallback(
+    (config: Partial<RangeRepeatConfig>) => {
+      setState((prev) => ({
+        ...prev,
+        rangeRepeat: { ...prev.rangeRepeat, ...config, currentRepeat: 0 },
+      }));
+    },
+    [],
+  );
+
+  const clearRange = useCallback(() => {
+    setState((prev) => ({
+      ...prev,
+      rangeRepeat: defaultRangeRepeat,
+    }));
+  }, []);
+
   // Cleanup on unmount or surah change
   useEffect(() => {
     return () => {
@@ -234,6 +322,14 @@ export function useRecitation(surahNumber: number, ayahs: Ayah[]) {
     };
   }, [surahNumber]);
 
+  // Reset range when surah changes
+  useEffect(() => {
+    setState((prev) => ({
+      ...prev,
+      rangeRepeat: defaultRangeRepeat,
+    }));
+  }, [surahNumber]);
+
   return {
     ...state,
     playAyah,
@@ -241,5 +337,7 @@ export function useRecitation(surahNumber: number, ayahs: Ayah[]) {
     togglePlayPause,
     stop,
     setReciter,
+    setRangeRepeat,
+    clearRange,
   };
 }
