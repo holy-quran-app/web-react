@@ -86,7 +86,7 @@ export function useRecitation(surahNumber: number, ayahs: Ayah[]) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const playAyahRef = useRef<(index: number) => void>(() => {});
   const rangeRepeatRef = useRef<RangeRepeatConfig>(defaultRangeRepeat);
-  const [state, setState] = useState<RecitationState>({
+  const [state, setState] = useState<RecitationState & { _surahNumber: number }>({
     currentAyahIndex: null,
     isPlaying: false,
     isLoading: false,
@@ -94,7 +94,17 @@ export function useRecitation(surahNumber: number, ayahs: Ayah[]) {
     duration: 0,
     reciter: getSavedReciter(),
     rangeRepeat: defaultRangeRepeat,
+    _surahNumber: surahNumber,
   });
+
+  // Reset range when surah changes (React-recommended pattern for adjusting state based on props)
+  if (state._surahNumber !== surahNumber) {
+    setState((prev) => ({
+      ...prev,
+      _surahNumber: surahNumber,
+      rangeRepeat: defaultRangeRepeat,
+    }));
+  }
 
   // Keep ref in sync with state
   useEffect(() => {
@@ -322,16 +332,10 @@ export function useRecitation(surahNumber: number, ayahs: Ayah[]) {
     };
   }, [surahNumber]);
 
-  // Reset range when surah changes
-  useEffect(() => {
-    setState((prev) => ({
-      ...prev,
-      rangeRepeat: defaultRangeRepeat,
-    }));
-  }, [surahNumber]);
-
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { _surahNumber: _unused, ...publicState } = state;
   return {
-    ...state,
+    ...publicState,
     playAyah,
     playSurah,
     togglePlayPause,
