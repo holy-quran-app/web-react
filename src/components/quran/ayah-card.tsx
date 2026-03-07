@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Play, Pause, Loader2, BookOpen } from "lucide-react";
+import { Play, Pause, Loader2, BookOpen, Pin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -15,6 +15,8 @@ interface AyahCardProps {
   onTogglePlayPause: () => void;
   tajweedText?: string;
   isInRange?: boolean;
+  isPinned?: boolean;
+  onTogglePin?: () => void;
 }
 
 function hizbQuarterLabel(quarter: number): string {
@@ -33,6 +35,8 @@ export function AyahCard({
   onTogglePlayPause,
   tajweedText,
   isInRange,
+  isPinned,
+  onTogglePin,
 }: AyahCardProps) {
   const isActive = isCurrentlyPlaying || isLoading;
   const tajweedHtml = useMemo(
@@ -92,6 +96,22 @@ export function AyahCard({
               <Play className="size-3" />
             )}
           </Button>
+          {onTogglePin && (
+            <Button
+              variant="ghost"
+              size="icon-xs"
+              onClick={onTogglePin}
+              aria-label={isPinned ? "Unpin ayah" : "Pin ayah"}
+              className={cn(
+                "text-muted-foreground hover:text-accent",
+                isPinned && "text-accent",
+              )}
+            >
+              <Pin
+                className={cn("size-3", isPinned && "fill-current")}
+              />
+            </Button>
+          )}
         </div>
         <div className="flex min-w-0 flex-1 flex-col gap-2">
           {tajweedHtml ? (

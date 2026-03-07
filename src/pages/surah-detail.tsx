@@ -7,6 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useSurah } from "@/hooks/use-surah";
 import { useTajweed } from "@/hooks/use-tajweed";
 import { useRecitation } from "@/hooks/use-recitation";
+import { usePinnedAyah } from "@/hooks/use-pinned-ayah";
 import { AyahCard } from "@/components/quran/ayah-card";
 import { RecitationPlayer } from "@/components/quran/recitation-player";
 
@@ -19,8 +20,25 @@ export function SurahDetailPage() {
   const ayahs = surah?.ayahs ?? [];
 
   const recitation = useRecitation(surahNumber, ayahs);
+  const { pinnedAyah, togglePin } = usePinnedAyah();
 
   const ayahRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+  const hasScrolledToPin = useRef(false);
+
+  // Scroll to pinned ayah on first load
+  useEffect(() => {
+    if (hasScrolledToPin.current || loading || !surah) return;
+    if (pinnedAyah && pinnedAyah.surahNumber === surahNumber) {
+      hasScrolledToPin.current = true;
+      // Delay slightly to ensure DOM is rendered
+      requestAnimationFrame(() => {
+        const el = ayahRefs.current.get(pinnedAyah.ayahIndex);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      });
+    }
+  }, [loading, surah, pinnedAyah, surahNumber]);
 
   // Scroll to the currently playing ayah
   useEffect(() => {
@@ -139,6 +157,18 @@ export function SurahDetailPage() {
                     recitation.rangeRepeat.endIndex !== null &&
                     index >= recitation.rangeRepeat.startIndex &&
                     index <= recitation.rangeRepeat.endIndex
+                  }
+                  isPinned={
+                    pinnedAyah?.surahNumber === surahNumber &&
+                    pinnedAyah?.ayahIndex === index
+                  }
+                  onTogglePin={() =>
+                    togglePin({
+                      surahNumber,
+                      ayahIndex: index,
+                      ayahNumberInSurah: ayah.numberInSurah,
+                      surahName: surah.englishName,
+                    })
                   }
                 />
               </div>

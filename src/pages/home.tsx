@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -6,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { usePinnedAyah } from "@/hooks/use-pinned-ayah";
 
 const features = [
   {
@@ -29,6 +31,16 @@ const features = [
 ];
 
 export function HomePage() {
+  const { pinnedAyah } = usePinnedAyah();
+  const navigate = useNavigate();
+
+  // Auto-navigate to pinned ayah on visit
+  useEffect(() => {
+    if (pinnedAyah) {
+      navigate(`/surah/${pinnedAyah.surahNumber}`, { replace: true });
+    }
+  }, [pinnedAyah, navigate]);
+
   return (
     <div className="flex flex-col">
       {/* Hero */}
