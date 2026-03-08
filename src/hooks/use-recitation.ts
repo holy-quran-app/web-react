@@ -3,10 +3,7 @@ import type { Ayah, Reciter } from "@/types/quran";
 
 export const RECITERS: Reciter[] = [
   { identifier: "ar.alafasy", name: "Mishary Rashid Alafasy" },
-  { identifier: "ar.abdurrahmaansudais", name: "Abdurrahmaan As-Sudais" },
-  { identifier: "ar.abdullahbasfar", name: "Abdullah Basfar" },
   { identifier: "ar.husary", name: "Husary" },
-  { identifier: "ar.huthayfi", name: "Huthayfi" },
   { identifier: "ar.minshawi", name: "Minshawi" },
   { identifier: "ar.muhammadayyoub", name: "Muhammad Ayyoub" },
   { identifier: "ar.muhammadjibreel", name: "Muhammad Jibreel" },
