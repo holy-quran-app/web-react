@@ -44,27 +44,7 @@ export function useSurah(number: string | undefined, tajweed = false) {
         if (tajweed && results[1]?.data?.ayahs) {
           tajweedTexts = new Map();
           for (const ayah of results[1].data.ayahs as { numberInSurah: number; text: string }[]) {
-            let text = ayah.text;
-            // Strip bismillah from first ayah's tajweed text too.
-            // The tajweed text contains bracket annotations, so match on the
-            // last word of the bismillah ("لرَّحِيمِ") and strip everything before it.
-            if (
-              ayah.numberInSurah === 1 &&
-              surah.number !== 1 &&
-              surah.number !== 9
-            ) {
-              const marker = "لرَّحِيمِ";
-              const idx = text.indexOf(marker);
-              if (idx !== -1) {
-                let end = idx + marker.length;
-                // Skip closing tajweed brackets and whitespace after the marker
-                while (end < text.length && (text[end] === "]" || /\s/.test(text[end]))) {
-                  end++;
-                }
-                text = text.substring(end);
-              }
-            }
-            tajweedTexts.set(ayah.numberInSurah, text);
+            tajweedTexts.set(ayah.numberInSurah, ayah.text);
           }
         }
 
