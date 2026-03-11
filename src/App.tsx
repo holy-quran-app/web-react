@@ -1,6 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/context/theme-provider";
-import { TajweedProvider } from "@/context/tajweed-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { RootLayout } from "@/components/layout/root-layout";
 import { HomePage } from "@/pages/home";
@@ -11,8 +10,7 @@ import { NotFoundPage } from "@/pages/not-found";
 export default function App() {
   return (
     <ThemeProvider defaultTheme="light">
-      <TajweedProvider>
-        <TooltipProvider>
+      <TooltipProvider>
         <BrowserRouter basename={import.meta.env.BASE_URL}>
           <Routes>
             <Route element={<RootLayout />}>
@@ -23,8 +21,7 @@ export default function App() {
             </Route>
           </Routes>
         </BrowserRouter>
-        </TooltipProvider>
-      </TajweedProvider>
+      </TooltipProvider>
     </ThemeProvider>
   );
 }

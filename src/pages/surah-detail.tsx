@@ -12,7 +12,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useSurah } from "@/hooks/use-surah";
-import { useTajweed } from "@/hooks/use-tajweed";
 import { useTranslation } from "@/hooks/use-translation";
 import { useRecitation } from "@/hooks/use-recitation";
 import { usePinnedAyah } from "@/hooks/use-pinned-ayah";
@@ -21,8 +20,7 @@ import { RecitationPlayer } from "@/components/quran/recitation-player";
 
 export function SurahDetailPage() {
   const { number } = useParams<{ number: string }>();
-  const { tajweedEnabled, setTajweedEnabled } = useTajweed();
-  const { surah, tajweedTexts, loading } = useSurah(number, tajweedEnabled);
+  const { surah, loading } = useSurah(number);
   const {
     edition,
     setEdition,
@@ -113,16 +111,6 @@ export function SurahDetailPage() {
                 <Link to={`/surah/${surahNumber + 1}`}>Next Surah</Link>
               </Button>
             )}
-            <Button
-              variant={tajweedEnabled ? "default" : "outline"}
-              size="sm"
-              onClick={() => setTajweedEnabled(!tajweedEnabled)}
-              aria-label={tajweedEnabled ? "Disable Tajweed colors" : "Enable Tajweed colors"}
-              className="gap-1.5"
-            >
-              <TajweedIcon className="size-4" />
-              Tajweed
-            </Button>
           </div>
           <div className="flex items-center gap-2 pt-2">
             <Select
@@ -183,11 +171,6 @@ export function SurahDetailPage() {
                   }
                   onPlay={recitation.playAyah}
                   onTogglePlayPause={recitation.togglePlayPause}
-                  tajweedText={
-                    tajweedEnabled
-                      ? tajweedTexts?.get(ayah.numberInSurah)
-                      : undefined
-                  }
                   translationText={translations?.get(ayah.numberInSurah)}
                   isInRange={
                     recitation.rangeRepeat.startIndex !== null &&
@@ -249,28 +232,5 @@ export function SurahDetailPage() {
         onClearRange={recitation.clearRange}
       />
     </div>
-  );
-}
-
-function TajweedIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
-      <path d="M12 2v4" />
-      <path d="m6.8 15-3.5 2" />
-      <path d="m20.7 17-3.5-2" />
-      <path d="M6.5 8.5c1.6-1.6 4-2.2 6.2-1.5" />
-      <circle cx="12" cy="12" r="3" />
-      <path d="M12 15v4" />
-      <circle cx="12" cy="12" r="8" strokeDasharray="4 2" />
-    </svg>
   );
 }
