@@ -106,3 +106,97 @@
     font-family: var(--font-sans);
   }
 }
+
+/* Tajweed color rules — colors from https://alquran.cloud/tajweed-guide */
+[data-tajweed] .ham_wasl {
+  color: #aaaaaa;
+}
+[data-tajweed] .slnt {
+  color: #aaaaaa;
+}
+[data-tajweed] .madda_normal {
+  color: #537fff;
+}
+[data-tajweed] .madda_permissible {
+  color: #4050ff;
+}
+[data-tajweed] .madda_necessary {
+  color: #000ebc;
+}
+[data-tajweed] .madda_obligatory {
+  color: #2144c1;
+}
+[data-tajweed] .qlq {
+  color: #dd0008;
+}
+[data-tajweed] .ikhf_shfw {
+  color: #d500b7;
+}
+[data-tajweed] .ikhf {
+  color: #9400a8;
+}
+[data-tajweed] .idghm_shfw {
+  color: #58b800;
+}
+[data-tajweed] .iqlb {
+  color: #26bffd;
+}
+[data-tajweed] .idgh_ghn {
+  color: #169777;
+}
+[data-tajweed] .idgh_w_ghn {
+  color: #169200;
+}
+[data-tajweed] .idgh_mus {
+  color: #a1a1a1;
+}
+[data-tajweed] .ghn {
+  color: #ff7e1e;
+}
+
+/* Dark mode: brighten colors for contrast on dark backgrounds */
+.dark [data-tajweed] .ham_wasl {
+  color: #cccccc;
+}
+.dark [data-tajweed] .slnt {
+  color: #cccccc;
+}
+.dark [data-tajweed] .madda_normal {
+  color: #7da0ff;
+}
+.dark [data-tajweed] .madda_permissible {
+  color: #7080ff;
+}
+.dark [data-tajweed] .madda_necessary {
+  color: #4466ee;
+}
+.dark [data-tajweed] .madda_obligatory {
+  color: #5577ee;
+}
+.dark [data-tajweed] .qlq {
+  color: #ff4450;
+}
+.dark [data-tajweed] .ikhf_shfw {
+  color: #ee44cc;
+}
+.dark [data-tajweed] .ikhf {
+  color: #bb55cc;
+}
+.dark [data-tajweed] .idghm_shfw {
+  color: #77dd33;
+}
+.dark [data-tajweed] .iqlb {
+  color: #55ddff;
+}
+.dark [data-tajweed] .idgh_ghn {
+  color: #33bb99;
+}
+.dark [data-tajweed] .idgh_w_ghn {
+  color: #33bb44;
+}
+.dark [data-tajweed] .idgh_mus {
+  color: #cccccc;
+}
+.dark [data-tajweed] .ghn {
+  color: #ff9944;
+}
