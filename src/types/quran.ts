@@ -7,6 +7,12 @@ export interface Surah {
   revelationType: "Meccan" | "Medinan";
 }
 
+export interface SajdaInfo {
+  id: number;
+  recommended: boolean;
+  obligatory: boolean;
+}
+
 export interface Ayah {
   number: number;
   text: string;
@@ -14,8 +20,15 @@ export interface Ayah {
   juz: number;
   page: number;
   hizbQuarter: number;
+  sajda: boolean | SajdaInfo;
   audio?: string;
   audioSecondary?: string[];
+}
+
+export interface TranslationEdition {
+  identifier: string;
+  language: string;
+  englishName: string;
 }
 
 export interface SurahDetail extends Surah {

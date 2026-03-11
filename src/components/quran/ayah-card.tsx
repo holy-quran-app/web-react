@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { Play, Pause, Loader2, BookOpen, Pin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { parseTajweedMarkup } from "@/lib/tajweed-parser";
 import type { Ayah } from "@/types/quran";
@@ -14,6 +15,7 @@ interface AyahCardProps {
   onPlay: (index: number) => void;
   onTogglePlayPause: () => void;
   tajweedText?: string;
+  translationText?: string;
   isInRange?: boolean;
   isPinned?: boolean;
   onTogglePin?: () => void;
@@ -26,6 +28,44 @@ function hizbQuarterLabel(quarter: number): string {
   return `Hizb ${hizbNumber} (${posLabels[pos - 1]})`;
 }
 
+function hasSajda(ayah: Ayah): boolean {
+  return ayah.sajda !== false && ayah.sajda !== undefined;
+}
+
+function isSajdaObligatory(ayah: Ayah): boolean {
+  if (typeof ayah.sajda === "object" && ayah.sajda !== null) {
+    return ayah.sajda.obligatory;
+  }
+  return false;
+}
+
+function SajdaIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      {/* Person in prostration */}
+      <circle cx="6" cy="6" r="2" />
+      <path d="M4 14c0-2 1-3 3-3h2c2 0 4 1 4 3" />
+      <path d="M6 11v3" />
+      <path d="M13 14H4" />
+      {/* Down arrow indicating prostration */}
+      <path d="M18 8v6" />
+      <path d="m15 11 3 3 3-3" />
+      {/* Ground line */}
+      <line x1="2" y1="18" x2="22" y2="18" />
+    </svg>
+  );
+}
+
 export function AyahCard({
   ayah,
   index,
@@ -34,6 +74,7 @@ export function AyahCard({
   onPlay,
   onTogglePlayPause,
   tajweedText,
+  translationText,
   isInRange,
   isPinned,
   onTogglePin,
@@ -112,6 +153,36 @@ export function AyahCard({
               />
             </Button>
           )}
+          {hasSajda(ayah) && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div
+                    className={cn(
+                      "flex h-6 w-6 items-center justify-center rounded-full",
+                      isSajdaObligatory(ayah)
+                        ? "bg-red-500/15 text-red-600 dark:text-red-400"
+                        : "bg-amber-500/15 text-amber-600 dark:text-amber-400",
+                    )}
+                    aria-label={
+                      isSajdaObligatory(ayah)
+                        ? "Obligatory Sajda (prostration)"
+                        : "Recommended Sajda (prostration)"
+                    }
+                  >
+                    <SajdaIcon className="size-3.5" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>
+                    {isSajdaObligatory(ayah)
+                      ? "Obligatory Sajda"
+                      : "Recommended Sajda"}
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
         </div>
         <div className="flex min-w-0 flex-1 flex-col gap-2">
           {tajweedHtml ? (
@@ -129,6 +200,11 @@ export function AyahCard({
               lang="ar"
             >
               {ayah.text}
+            </p>
+          )}
+          {translationText && (
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              {translationText}
             </p>
           )}
           {/* Ayah metadata */}
