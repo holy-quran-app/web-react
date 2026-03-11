@@ -4,8 +4,16 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useSurah } from "@/hooks/use-surah";
 import { useTajweed } from "@/hooks/use-tajweed";
+import { useTranslation } from "@/hooks/use-translation";
 import { useRecitation } from "@/hooks/use-recitation";
 import { usePinnedAyah } from "@/hooks/use-pinned-ayah";
 import { AyahCard } from "@/components/quran/ayah-card";
@@ -15,6 +23,13 @@ export function SurahDetailPage() {
   const { number } = useParams<{ number: string }>();
   const { tajweedEnabled, setTajweedEnabled } = useTajweed();
   const { surah, tajweedTexts, loading } = useSurah(number, tajweedEnabled);
+  const {
+    edition,
+    setEdition,
+    translations,
+    translationLoading,
+    availableEditions,
+  } = useTranslation(number);
 
   const surahNumber = Number(number);
   const ayahs = surah?.ayahs ?? [];
@@ -87,7 +102,7 @@ export function SurahDetailPage() {
             {surah.englishNameTranslation} &middot; {surah.numberOfAyahs} Ayahs
             &middot; {surah.revelationType}
           </p>
-          <div className="flex items-center gap-2 pt-2">
+          <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
             {surahNumber > 1 && (
               <Button variant="outline" size="sm" asChild>
                 <Link to={`/surah/${surahNumber - 1}`}>Previous Surah</Link>
@@ -108,6 +123,27 @@ export function SurahDetailPage() {
               <TajweedIcon className="size-4" />
               Tajweed
             </Button>
+          </div>
+          <div className="flex items-center gap-2 pt-2">
+            <Select
+              value={edition ?? "none"}
+              onValueChange={(val) => setEdition(val === "none" ? null : val)}
+            >
+              <SelectTrigger className="w-64" aria-label="Select translation">
+                <SelectValue placeholder="Select Translation" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">No Translation</SelectItem>
+                {availableEditions.map((ed) => (
+                  <SelectItem key={ed.identifier} value={ed.identifier}>
+                    {ed.englishName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {translationLoading && (
+              <span className="text-xs text-muted-foreground">Loading...</span>
+            )}
           </div>
         </div>
 
@@ -152,6 +188,7 @@ export function SurahDetailPage() {
                       ? tajweedTexts?.get(ayah.numberInSurah)
                       : undefined
                   }
+                  translationText={translations?.get(ayah.numberInSurah)}
                   isInRange={
                     recitation.rangeRepeat.startIndex !== null &&
                     recitation.rangeRepeat.endIndex !== null &&
