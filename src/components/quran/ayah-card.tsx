@@ -26,7 +26,11 @@ interface AyahCardProps {
   onTogglePin?: () => void;
   isHighlighted?: boolean;
   leftSlot?: ReactNode;
+  rightSlot?: ReactNode;
   footerSlot?: ReactNode;
+  arabicClassName?: string;
+  translationClassName?: string;
+  showTranslation?: boolean;
 }
 
 function hizbQuarterLabel(quarter: number): string {
@@ -88,7 +92,11 @@ export function AyahCard({
   onTogglePin,
   isHighlighted,
   leftSlot,
+  rightSlot,
   footerSlot,
+  arabicClassName,
+  translationClassName,
+  showTranslation = true,
 }: AyahCardProps) {
   const isActive = isCurrentlyPlaying || isLoading;
   const tajweedHtml = useMemo(
@@ -198,29 +206,41 @@ export function AyahCard({
           )}
         </div>
         <div className="flex min-w-0 flex-1 flex-col gap-2">
-          {tajweedHtml ? (
-            <p
-              className="text-right font-arabic text-2xl leading-[2.5] md:text-3xl"
-              dir="rtl"
-              lang="ar"
-              data-tajweed=""
-              dangerouslySetInnerHTML={{ __html: tajweedHtml }}
-            />
-          ) : (
-            <p
-              className="text-right font-arabic text-2xl leading-[2.5] md:text-3xl"
-              dir="rtl"
-              lang="ar"
-            >
-              {ayah.text}
-            </p>
-          )}
-          {translations && translations.length > 0 && (
+          <div className="flex items-start justify-between gap-2">
+            {tajweedHtml ? (
+              <p
+                className={cn(
+                  "flex-1 text-right font-arabic leading-[2.5]",
+                  arabicClassName ?? "text-2xl md:text-3xl",
+                )}
+                dir="rtl"
+                lang="ar"
+                data-tajweed=""
+                dangerouslySetInnerHTML={{ __html: tajweedHtml }}
+              />
+            ) : (
+              <p
+                className={cn(
+                  "flex-1 text-right font-arabic leading-[2.5]",
+                  arabicClassName ?? "text-2xl md:text-3xl",
+                )}
+                dir="rtl"
+                lang="ar"
+              >
+                {ayah.text}
+              </p>
+            )}
+            {rightSlot && <div className="shrink-0">{rightSlot}</div>}
+          </div>
+          {showTranslation && translations && translations.length > 0 && (
             <div className="flex flex-col gap-2">
               {translations.map(
                 (t) =>
                   t.text && (
-                    <div key={t.edition.identifier} className="text-sm leading-relaxed">
+                    <div
+                      key={t.edition.identifier}
+                      className={cn("leading-relaxed", translationClassName ?? "text-sm")}
+                    >
                       {translations.length > 1 && (
                         <p className="text-[11px] font-medium uppercase tracking-wide text-primary/70">
                           {t.edition.englishName}

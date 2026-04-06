@@ -18,11 +18,26 @@ import { useRecitation } from "@/hooks/use-recitation";
 import { usePinnedAyah } from "@/hooks/use-pinned-ayah";
 import { useBookmarks } from "@/hooks/use-bookmarks";
 import { useTafsir } from "@/hooks/use-tafsir";
+import { useReadingSettings } from "@/hooks/use-reading-settings";
+import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { AyahCard } from "@/components/quran/ayah-card";
 import { RecitationPlayer } from "@/components/quran/recitation-player";
 import { TranslationMultiselect } from "@/components/quran/translation-multiselect";
 import { TafsirPanel } from "@/components/quran/tafsir-panel";
 import { BookmarkButton } from "@/components/quran/bookmark-button";
+import { AyahActions } from "@/components/quran/ayah-actions";
+
+const ARABIC_SIZE_CLASS: Record<string, string> = {
+  sm: "text-xl md:text-2xl",
+  md: "text-2xl md:text-3xl",
+  lg: "text-3xl md:text-4xl",
+  xl: "text-4xl md:text-5xl",
+};
+const TRANSLATION_SIZE_CLASS: Record<string, string> = {
+  sm: "text-xs",
+  md: "text-sm",
+  lg: "text-base",
+};
 
 export function SurahDetailPage() {
   const { number, ayah: ayahParam } = useParams<{ number: string; ayah?: string }>();
@@ -50,6 +65,32 @@ export function SurahDetailPage() {
   });
   const { pinnedAyah, togglePin } = usePinnedAyah();
   const { isBookmarked, toggleBookmark } = useBookmarks();
+  const { arabicFontSize, translationFontSize, showTranslation } =
+    useReadingSettings();
+
+  useKeyboardShortcuts({
+    onTogglePlay: () => {
+      if (recitation.currentAyahIndex === null) {
+        recitation.playSurah();
+      } else {
+        recitation.togglePlayPause();
+      }
+    },
+    onNextAyah: () => {
+      const cur = recitation.currentAyahIndex;
+      if (cur !== null && cur + 1 < ayahs.length) recitation.playAyah(cur + 1);
+    },
+    onPrevAyah: () => {
+      const cur = recitation.currentAyahIndex;
+      if (cur !== null && cur > 0) recitation.playAyah(cur - 1);
+    },
+    onNextSurah: () => {
+      if (surahNumber < 114) navigate(`/surah/${surahNumber + 1}`);
+    },
+    onPrevSurah: () => {
+      if (surahNumber > 1) navigate(`/surah/${surahNumber - 1}`);
+    },
+  });
 
   const {
     edition: tafsirEdition,
@@ -263,6 +304,21 @@ export function SurahDetailPage() {
                       })
                     }
                     isHighlighted={highlightedIndex === index}
+                    arabicClassName={ARABIC_SIZE_CLASS[arabicFontSize]}
+                    translationClassName={TRANSLATION_SIZE_CLASS[translationFontSize]}
+                    showTranslation={showTranslation}
+                    rightSlot={
+                      <AyahActions
+                        arabicText={ayah.text}
+                        translations={ayahTranslations.map((t) => ({
+                          label: t.edition.englishName,
+                          text: t.text ?? "",
+                        }))}
+                        surahNumber={surahNumber}
+                        surahName={surah.englishName}
+                        ayahNumberInSurah={ayah.numberInSurah}
+                      />
+                    }
                     leftSlot={
                       <BookmarkButton
                         isBookmarked={bookmarked}

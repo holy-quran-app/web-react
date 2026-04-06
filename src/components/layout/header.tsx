@@ -42,6 +42,12 @@ export function Header() {
           <Button variant="ghost" size="sm" asChild>
             <Link to="/bookmarks">Bookmarks</Link>
           </Button>
+          <Button variant="ghost" size="sm" asChild>
+            <Link to="/search" aria-label="Search">Search</Link>
+          </Button>
+          <Button variant="ghost" size="sm" asChild className="hidden md:inline-flex">
+            <Link to="/settings">Settings</Link>
+          </Button>
           {pinnedAyah && (
             <Button variant="ghost" size="sm" asChild>
               <Link
