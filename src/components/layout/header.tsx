@@ -30,6 +30,18 @@ export function Header() {
           <Button variant="ghost" size="sm" asChild>
             <Link to="/surah">Surahs</Link>
           </Button>
+          <Button variant="ghost" size="sm" asChild className="hidden md:inline-flex">
+            <Link to="/juz">Juz</Link>
+          </Button>
+          <Button variant="ghost" size="sm" asChild className="hidden md:inline-flex">
+            <Link to="/page">Pages</Link>
+          </Button>
+          <Button variant="ghost" size="sm" asChild className="hidden lg:inline-flex">
+            <Link to="/hizb">Hizb</Link>
+          </Button>
+          <Button variant="ghost" size="sm" asChild>
+            <Link to="/bookmarks">Bookmarks</Link>
+          </Button>
           {pinnedAyah && (
             <Button variant="ghost" size="sm" asChild>
               <Link

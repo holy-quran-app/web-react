@@ -1,5 +1,5 @@
-import { useEffect, useRef } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -16,44 +16,81 @@ import { useTajweed } from "@/hooks/use-tajweed";
 import { useTranslation } from "@/hooks/use-translation";
 import { useRecitation } from "@/hooks/use-recitation";
 import { usePinnedAyah } from "@/hooks/use-pinned-ayah";
+import { useBookmarks } from "@/hooks/use-bookmarks";
+import { useTafsir } from "@/hooks/use-tafsir";
 import { AyahCard } from "@/components/quran/ayah-card";
 import { RecitationPlayer } from "@/components/quran/recitation-player";
+import { TranslationMultiselect } from "@/components/quran/translation-multiselect";
+import { TafsirPanel } from "@/components/quran/tafsir-panel";
+import { BookmarkButton } from "@/components/quran/bookmark-button";
 
 export function SurahDetailPage() {
-  const { number } = useParams<{ number: string }>();
+  const { number, ayah: ayahParam } = useParams<{ number: string; ayah?: string }>();
+  const navigate = useNavigate();
   const { tajweedEnabled, setTajweedEnabled } = useTajweed();
   const { surah, tajweedTexts, loading } = useSurah(number, tajweedEnabled);
   const {
-    edition,
-    setEdition,
-    translations,
+    editions,
+    toggleEdition,
+    translationResults,
     translationLoading,
     availableEditions,
   } = useTranslation(number);
 
   const surahNumber = Number(number);
-  const ayahs = surah?.ayahs ?? [];
+  const ayahs = useMemo(() => surah?.ayahs ?? [], [surah]);
 
-  const recitation = useRecitation(surahNumber, ayahs);
+  const [continueNextSurah, setContinueNextSurah] = useState(false);
+  const recitation = useRecitation(surahNumber, ayahs, {
+    onSurahEnded: () => {
+      if (continueNextSurah && surahNumber < 114) {
+        navigate(`/surah/${surahNumber + 1}`);
+      }
+    },
+  });
   const { pinnedAyah, togglePin } = usePinnedAyah();
+  const { isBookmarked, toggleBookmark } = useBookmarks();
+
+  const {
+    edition: tafsirEdition,
+    setEdition: setTafsirEdition,
+    tafsirMap,
+    loading: tafsirLoading,
+    availableEditions: tafsirEditions,
+  } = useTafsir(surahNumber || undefined);
 
   const ayahRefs = useRef<Map<number, HTMLDivElement>>(new Map());
-  const hasScrolledToPin = useRef(false);
+  const hasScrolledInitial = useRef(false);
 
-  // Scroll to pinned ayah on first load
+  // Highlight from :ayah param
+  const highlightedIndex = useMemo(() => {
+    if (!ayahParam || !surah) return null;
+    const n = Number(ayahParam);
+    const idx = surah.ayahs.findIndex((a) => a.numberInSurah === n);
+    return idx >= 0 ? idx : null;
+  }, [ayahParam, surah]);
+
+  // Reset scroll flag when surah changes
   useEffect(() => {
-    if (hasScrolledToPin.current || loading || !surah) return;
-    if (pinnedAyah && pinnedAyah.surahNumber === surahNumber) {
-      hasScrolledToPin.current = true;
-      // Delay slightly to ensure DOM is rendered
-      requestAnimationFrame(() => {
-        const el = ayahRefs.current.get(pinnedAyah.ayahIndex);
-        if (el) {
-          el.scrollIntoView({ behavior: "smooth", block: "center" });
-        }
-      });
-    }
-  }, [loading, surah, pinnedAyah, surahNumber]);
+    hasScrolledInitial.current = false;
+  }, [surahNumber, ayahParam]);
+
+  // Initial scroll: deep-link ayah > pinned ayah
+  useEffect(() => {
+    if (hasScrolledInitial.current || loading || !surah) return;
+    const targetIndex =
+      highlightedIndex !== null
+        ? highlightedIndex
+        : pinnedAyah && pinnedAyah.surahNumber === surahNumber
+          ? pinnedAyah.ayahIndex
+          : null;
+    if (targetIndex === null) return;
+    hasScrolledInitial.current = true;
+    requestAnimationFrame(() => {
+      const el = ayahRefs.current.get(targetIndex);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  }, [loading, surah, pinnedAyah, surahNumber, highlightedIndex]);
 
   // Scroll to the currently playing ayah
   useEffect(() => {
@@ -123,25 +160,34 @@ export function SurahDetailPage() {
               <TajweedIcon className="size-4" />
               Tajweed
             </Button>
-          </div>
-          <div className="flex items-center gap-2 pt-2">
-            <Select
-              value={edition ?? "none"}
-              onValueChange={(val) => setEdition(val === "none" ? null : val)}
+            <Button
+              variant={continueNextSurah ? "default" : "outline"}
+              size="sm"
+              onClick={() => setContinueNextSurah((v) => !v)}
+              aria-pressed={continueNextSurah}
             >
-              <SelectTrigger className="w-64" aria-label="Select translation">
-                <SelectValue placeholder="Select Translation" />
+              Continue to next surah
+            </Button>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+            <TranslationMultiselect
+              availableEditions={availableEditions}
+              selected={editions}
+              onToggle={toggleEdition}
+            />
+            <Select value={tafsirEdition} onValueChange={setTafsirEdition}>
+              <SelectTrigger className="w-60" aria-label="Select tafsir">
+                <SelectValue placeholder="Tafsir" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">No Translation</SelectItem>
-                {availableEditions.map((ed) => (
+                {tafsirEditions.map((ed) => (
                   <SelectItem key={ed.identifier} value={ed.identifier}>
                     {ed.englishName}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            {translationLoading && (
+            {(translationLoading || tafsirLoading) && (
               <span className="text-xs text-muted-foreground">Loading...</span>
             )}
           </div>
@@ -149,7 +195,7 @@ export function SurahDetailPage() {
 
         <Separator className="mb-8" />
 
-        {/* Bismillah for all surahs except At-Tawbah (9) */}
+        {/* Bismillah for all surahs except At-Tawbah (9) and Al-Fatiha (1) */}
         {surah.number !== 9 && surah.number !== 1 && (
           <p className="mb-8 text-center font-arabic text-2xl leading-loose text-primary/80">
             بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
@@ -159,57 +205,88 @@ export function SurahDetailPage() {
         {/* Ayahs */}
         <ScrollArea className="h-auto">
           <div className="space-y-4">
-            {surah.ayahs.map((ayah, index) => (
-              <div
-                key={ayah.number}
-                ref={(el) => {
-                  if (el) {
-                    ayahRefs.current.set(index, el);
-                  } else {
-                    ayahRefs.current.delete(index);
-                  }
-                }}
-              >
-                <AyahCard
-                  ayah={ayah}
-                  index={index}
-                  isCurrentlyPlaying={
-                    recitation.currentAyahIndex === index &&
-                    recitation.isPlaying
-                  }
-                  isLoading={
-                    recitation.currentAyahIndex === index &&
-                    recitation.isLoading
-                  }
-                  onPlay={recitation.playAyah}
-                  onTogglePlayPause={recitation.togglePlayPause}
-                  tajweedText={
-                    tajweedEnabled
-                      ? tajweedTexts?.get(ayah.numberInSurah)
-                      : undefined
-                  }
-                  translationText={translations?.get(ayah.numberInSurah)}
-                  isInRange={
-                    recitation.rangeRepeat.startIndex !== null &&
-                    recitation.rangeRepeat.endIndex !== null &&
-                    index >= recitation.rangeRepeat.startIndex &&
-                    index <= recitation.rangeRepeat.endIndex
-                  }
-                  isPinned={
-                    pinnedAyah?.surahNumber === surahNumber &&
-                    pinnedAyah?.ayahIndex === index
-                  }
-                  onTogglePin={() =>
-                    togglePin({
-                      surahNumber,
-                      ayahIndex: index,
-                      ayahNumberInSurah: ayah.numberInSurah,
-                      surahName: surah.englishName,
-                    })
-                  }
-                />
-              </div>
-            ))}
+            {surah.ayahs.map((ayah, index) => {
+              const ayahTranslations = translationResults.map((r) => ({
+                edition: r.edition,
+                text: r.texts.get(ayah.numberInSurah),
+              }));
+              const bookmarked = isBookmarked(surahNumber, ayah.numberInSurah);
+              const tafsirText = tafsirMap?.get(ayah.numberInSurah);
+              const tafsirIsArabic = tafsirEdition.startsWith("ar.");
+              return (
+                <div
+                  key={ayah.number}
+                  id={`ayah-${ayah.numberInSurah}`}
+                  ref={(el) => {
+                    if (el) {
+                      ayahRefs.current.set(index, el);
+                    } else {
+                      ayahRefs.current.delete(index);
+                    }
+                  }}
+                >
+                  <AyahCard
+                    ayah={ayah}
+                    index={index}
+                    isCurrentlyPlaying={
+                      recitation.currentAyahIndex === index &&
+                      recitation.isPlaying
+                    }
+                    isLoading={
+                      recitation.currentAyahIndex === index &&
+                      recitation.isLoading
+                    }
+                    onPlay={recitation.playAyah}
+                    onTogglePlayPause={recitation.togglePlayPause}
+                    tajweedText={
+                      tajweedEnabled
+                        ? tajweedTexts?.get(ayah.numberInSurah)
+                        : undefined
+                    }
+                    translations={ayahTranslations}
+                    isInRange={
+                      recitation.rangeRepeat.startIndex !== null &&
+                      recitation.rangeRepeat.endIndex !== null &&
+                      index >= recitation.rangeRepeat.startIndex &&
+                      index <= recitation.rangeRepeat.endIndex
+                    }
+                    isPinned={
+                      pinnedAyah?.surahNumber === surahNumber &&
+                      pinnedAyah?.ayahIndex === index
+                    }
+                    onTogglePin={() =>
+                      togglePin({
+                        surahNumber,
+                        ayahIndex: index,
+                        ayahNumberInSurah: ayah.numberInSurah,
+                        surahName: surah.englishName,
+                      })
+                    }
+                    isHighlighted={highlightedIndex === index}
+                    leftSlot={
+                      <BookmarkButton
+                        isBookmarked={bookmarked}
+                        onToggle={() =>
+                          toggleBookmark({
+                            surahNumber,
+                            surahName: surah.englishName,
+                            ayahNumberInSurah: ayah.numberInSurah,
+                            ayahIndex: index,
+                          })
+                        }
+                      />
+                    }
+                    footerSlot={
+                      <TafsirPanel
+                        text={tafsirText}
+                        loading={tafsirLoading}
+                        isArabic={tafsirIsArabic}
+                      />
+                    }
+                  />
+                </div>
+              );
+            })}
           </div>
         </ScrollArea>
 

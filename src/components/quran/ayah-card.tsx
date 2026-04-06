@@ -1,11 +1,16 @@
-import { useMemo } from "react";
+import { type ReactNode, useMemo } from "react";
 import { Play, Pause, Loader2, BookOpen, Pin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { parseTajweedMarkup } from "@/lib/tajweed-parser";
-import type { Ayah } from "@/types/quran";
+import type { Ayah, TranslationEdition } from "@/types/quran";
+
+export interface AyahTranslation {
+  edition: TranslationEdition;
+  text: string | undefined;
+}
 
 interface AyahCardProps {
   ayah: Ayah;
@@ -15,10 +20,13 @@ interface AyahCardProps {
   onPlay: (index: number) => void;
   onTogglePlayPause: () => void;
   tajweedText?: string;
-  translationText?: string;
+  translations?: AyahTranslation[];
   isInRange?: boolean;
   isPinned?: boolean;
   onTogglePin?: () => void;
+  isHighlighted?: boolean;
+  leftSlot?: ReactNode;
+  footerSlot?: ReactNode;
 }
 
 function hizbQuarterLabel(quarter: number): string {
@@ -74,10 +82,13 @@ export function AyahCard({
   onPlay,
   onTogglePlayPause,
   tajweedText,
-  translationText,
+  translations,
   isInRange,
   isPinned,
   onTogglePin,
+  isHighlighted,
+  leftSlot,
+  footerSlot,
 }: AyahCardProps) {
   const isActive = isCurrentlyPlaying || isLoading;
   const tajweedHtml = useMemo(
@@ -93,6 +104,7 @@ export function AyahCard({
         !isActive &&
           isInRange &&
           "border-accent/30 bg-accent/5 ring-1 ring-accent/20",
+        isHighlighted && "border-accent/60 bg-accent/10 ring-2 ring-accent/40",
       )}
     >
       <div className="flex items-start gap-4">
@@ -153,6 +165,7 @@ export function AyahCard({
               />
             </Button>
           )}
+          {leftSlot}
           {hasSajda(ayah) && (
             <TooltipProvider>
               <Tooltip>
@@ -202,11 +215,24 @@ export function AyahCard({
               {ayah.text}
             </p>
           )}
-          {translationText && (
-            <p className="text-sm leading-relaxed text-muted-foreground">
-              {translationText}
-            </p>
+          {translations && translations.length > 0 && (
+            <div className="flex flex-col gap-2">
+              {translations.map(
+                (t) =>
+                  t.text && (
+                    <div key={t.edition.identifier} className="text-sm leading-relaxed">
+                      {translations.length > 1 && (
+                        <p className="text-[11px] font-medium uppercase tracking-wide text-primary/70">
+                          {t.edition.englishName}
+                        </p>
+                      )}
+                      <p className="text-muted-foreground">{t.text}</p>
+                    </div>
+                  ),
+              )}
+            </div>
           )}
+          {footerSlot}
           {/* Ayah metadata */}
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
             <span className="inline-flex items-center gap-1">

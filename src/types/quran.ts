@@ -48,3 +48,19 @@ export interface Reciter {
   identifier: string;
   name: string;
 }
+
+export interface TafsirEdition {
+  identifier: string;
+  language: string;
+  englishName: string;
+}
+
+export interface Bookmark {
+  id: string;
+  surahNumber: number;
+  surahName: string;
+  ayahNumberInSurah: number;
+  ayahIndex: number;
+  createdAt: number;
+  note?: string;
+}

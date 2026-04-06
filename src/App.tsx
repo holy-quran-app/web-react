@@ -6,6 +6,10 @@ import { RootLayout } from "@/components/layout/root-layout";
 import { HomePage } from "@/pages/home";
 import { SurahListPage } from "@/pages/surah-list";
 import { SurahDetailPage } from "@/pages/surah-detail";
+import { JuzListPage } from "@/pages/juz-list";
+import { PageListPage } from "@/pages/page-list";
+import { HizbListPage } from "@/pages/hizb-list";
+import { BookmarksPage } from "@/pages/bookmarks";
 import { NotFoundPage } from "@/pages/not-found";
 
 export default function App() {
@@ -19,6 +23,11 @@ export default function App() {
                 <Route index element={<HomePage />} />
                 <Route path="surah" element={<SurahListPage />} />
                 <Route path="surah/:number" element={<SurahDetailPage />} />
+                <Route path="surah/:number/:ayah" element={<SurahDetailPage />} />
+                <Route path="juz" element={<JuzListPage />} />
+                <Route path="page" element={<PageListPage />} />
+                <Route path="hizb" element={<HizbListPage />} />
+                <Route path="bookmarks" element={<BookmarksPage />} />
                 <Route path="*" element={<NotFoundPage />} />
               </Route>
             </Routes>

@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardDescription,
@@ -8,12 +9,18 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 import type { Surah } from "@/types/quran";
+
+type RevelationFilter = "all" | "Meccan" | "Medinan";
+type SortBy = "number" | "ayahs-desc" | "ayahs-asc" | "name";
 
 export function SurahListPage() {
   const [surahs, setSurahs] = useState<Surah[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [revelation, setRevelation] = useState<RevelationFilter>("all");
+  const [sortBy, setSortBy] = useState<SortBy>("number");
 
   useEffect(() => {
     fetch("https://api.alquran.cloud/v1/surah")
@@ -25,12 +32,34 @@ export function SurahListPage() {
       .catch(() => setLoading(false));
   }, []);
 
-  const filtered = surahs.filter(
-    (s) =>
-      s.englishName.toLowerCase().includes(search.toLowerCase()) ||
-      s.name.includes(search) ||
-      s.number.toString() === search,
-  );
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase();
+    const list = surahs.filter((s) => {
+      if (revelation !== "all" && s.revelationType !== revelation) return false;
+      if (!q) return true;
+      return (
+        s.englishName.toLowerCase().includes(q) ||
+        s.englishNameTranslation.toLowerCase().includes(q) ||
+        s.name.includes(search) ||
+        s.number.toString() === search
+      );
+    });
+    const sorted = [...list];
+    switch (sortBy) {
+      case "ayahs-desc":
+        sorted.sort((a, b) => b.numberOfAyahs - a.numberOfAyahs);
+        break;
+      case "ayahs-asc":
+        sorted.sort((a, b) => a.numberOfAyahs - b.numberOfAyahs);
+        break;
+      case "name":
+        sorted.sort((a, b) => a.englishName.localeCompare(b.englishName));
+        break;
+      default:
+        sorted.sort((a, b) => a.number - b.number);
+    }
+    return sorted;
+  }, [surahs, search, revelation, sortBy]);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -42,11 +71,39 @@ export function SurahListPage() {
           </p>
         </div>
         <Input
-          placeholder="Search by name or number..."
+          placeholder="Search by name, translation, or number..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="max-w-sm"
         />
+        <div className="flex flex-wrap gap-2">
+          {(["all", "Meccan", "Medinan"] as RevelationFilter[]).map((r) => (
+            <Chip
+              key={r}
+              active={revelation === r}
+              onClick={() => setRevelation(r)}
+            >
+              {r === "all" ? "All" : r}
+            </Chip>
+          ))}
+          <span className="mx-2 self-center text-muted-foreground">|</span>
+          {(
+            [
+              { key: "number", label: "By number" },
+              { key: "name", label: "By name" },
+              { key: "ayahs-desc", label: "Longest" },
+              { key: "ayahs-asc", label: "Shortest" },
+            ] as { key: SortBy; label: string }[]
+          ).map((s) => (
+            <Chip
+              key={s.key}
+              active={sortBy === s.key}
+              onClick={() => setSortBy(s.key)}
+            >
+              {s.label}
+            </Chip>
+          ))}
+        </div>
       </div>
 
       {loading ? (
@@ -83,5 +140,27 @@ export function SurahListPage() {
         </div>
       )}
     </div>
+  );
+}
+
+function Chip({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <Button
+      type="button"
+      variant={active ? "default" : "outline"}
+      size="sm"
+      onClick={onClick}
+      className={cn("h-8 rounded-full px-3", active && "shadow-sm")}
+    >
+      {children}
+    </Button>
   );
 }
