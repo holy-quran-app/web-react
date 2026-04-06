@@ -79,10 +79,22 @@ const defaultRangeRepeat: RangeRepeatConfig = {
   currentRepeat: 0,
 };
 
-export function useRecitation(surahNumber: number, ayahs: Ayah[]) {
+interface UseRecitationOptions {
+  onSurahEnded?: () => void;
+}
+
+export function useRecitation(
+  surahNumber: number,
+  ayahs: Ayah[],
+  options: UseRecitationOptions = {},
+) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const playAyahRef = useRef<(index: number) => void>(() => {});
   const rangeRepeatRef = useRef<RangeRepeatConfig>(defaultRangeRepeat);
+  const onSurahEndedRef = useRef(options.onSurahEnded);
+  useEffect(() => {
+    onSurahEndedRef.current = options.onSurahEnded;
+  }, [options.onSurahEnded]);
   const [state, setState] = useState<RecitationState & { _surahNumber: number }>({
     currentAyahIndex: null,
     isPlaying: false,
@@ -210,6 +222,7 @@ export function useRecitation(surahNumber: number, ayahs: Ayah[]) {
               playAyahRef.current(nextIndex);
             } else {
               stop();
+              onSurahEndedRef.current?.();
             }
           }
         },

@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import type { TranslationEdition } from "@/types/quran";
 
-const STORAGE_KEY = "holy-quran-translation";
+const STORAGE_KEY = "holy-quran-translations";
+const LEGACY_KEY = "holy-quran-translation";
 
 const POPULAR_EDITIONS: TranslationEdition[] = [
   { identifier: "en.sahih", language: "en", englishName: "Saheeh International" },
@@ -27,77 +28,128 @@ const POPULAR_EDITIONS: TranslationEdition[] = [
   { identifier: "ko.korean", language: "ko", englishName: "Korean" },
 ];
 
-function getSavedEdition(): string | null {
+function getSavedEditions(): string[] {
   try {
-    return localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed.filter((x) => typeof x === "string");
+    }
+    // Back-compat: migrate single-edition key
+    const legacy = localStorage.getItem(LEGACY_KEY);
+    if (legacy) return [legacy];
   } catch {
-    return null;
+    // ignore
   }
+  return ["en.sahih"];
 }
 
-interface TranslationState {
-  translations: Map<number, string> | null;
-  fetchedFor: string | null;
-  fetchedEdition: string | null;
+// cache: edition -> surah -> Map(ayah -> text)
+const translationCache = new Map<string, Map<string, Map<number, string>>>();
+
+async function fetchTranslation(
+  surahNumber: string,
+  edition: string,
+): Promise<Map<number, string>> {
+  let byEd = translationCache.get(edition);
+  if (!byEd) {
+    byEd = new Map();
+    translationCache.set(edition, byEd);
+  }
+  const hit = byEd.get(surahNumber);
+  if (hit) return hit;
+  const result = await fetch(
+    `https://api.alquran.cloud/v1/surah/${surahNumber}/${edition}`,
+  ).then((r) => r.json());
+  const map = new Map<number, string>();
+  for (const ayah of result.data.ayahs as { numberInSurah: number; text: string }[]) {
+    map.set(ayah.numberInSurah, ayah.text);
+  }
+  byEd.set(surahNumber, map);
+  return map;
+}
+
+export interface TranslationResult {
+  edition: TranslationEdition;
+  texts: Map<number, string>;
 }
 
 export function useTranslation(surahNumber: string | undefined) {
-  const [edition, setEditionState] = useState<string | null>(getSavedEdition);
-  const [data, setData] = useState<TranslationState>({
-    translations: null,
-    fetchedFor: null,
-    fetchedEdition: null,
-  });
+  const [editions, setEditionsState] = useState<string[]>(getSavedEditions);
+  const [results, setResults] = useState<TranslationResult[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const setEdition = useCallback((value: string | null) => {
-    setEditionState(value);
+  const setEditions = useCallback((values: string[]) => {
+    setEditionsState(values);
     try {
-      if (value) {
-        localStorage.setItem(STORAGE_KEY, value);
-      } else {
-        localStorage.removeItem(STORAGE_KEY);
-      }
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(values));
     } catch {
-      // ignore storage errors
+      // ignore
     }
   }, []);
 
-  useEffect(() => {
-    if (!surahNumber || !edition) return;
-
-    let cancelled = false;
-
-    fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/${edition}`)
-      .then((r) => r.json())
-      .then((result) => {
-        if (cancelled) return;
-        const map = new Map<number, string>();
-        for (const ayah of result.data.ayahs as { numberInSurah: number; text: string }[]) {
-          map.set(ayah.numberInSurah, ayah.text);
+  const toggleEdition = useCallback(
+    (identifier: string) => {
+      setEditionsState((prev) => {
+        const next = prev.includes(identifier)
+          ? prev.filter((x) => x !== identifier)
+          : [...prev, identifier];
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+        } catch {
+          // ignore
         }
-        setData({ translations: map, fetchedFor: surahNumber, fetchedEdition: edition });
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setData({ translations: null, fetchedFor: surahNumber, fetchedEdition: edition });
-        }
+        return next;
       });
+    },
+    [],
+  );
 
+  useEffect(() => {
+    let cancelled = false;
+    if (!surahNumber || editions.length === 0) {
+      queueMicrotask(() => {
+        if (!cancelled) setResults([]);
+      });
+      return () => {
+        cancelled = true;
+      };
+    }
+    queueMicrotask(() => {
+      if (!cancelled) setLoading(true);
+    });
+    Promise.all(
+      editions.map(async (id) => {
+        const edObj =
+          POPULAR_EDITIONS.find((e) => e.identifier === id) ?? {
+            identifier: id,
+            language: "",
+            englishName: id,
+          };
+        try {
+          const texts = await fetchTranslation(surahNumber, id);
+          return { edition: edObj, texts } satisfies TranslationResult;
+        } catch {
+          return { edition: edObj, texts: new Map<number, string>() } satisfies TranslationResult;
+        }
+      }),
+    ).then((arr) => {
+      if (!cancelled) {
+        setResults(arr);
+        setLoading(false);
+      }
+    });
     return () => {
       cancelled = true;
     };
-  }, [surahNumber, edition]);
-
-  const isStale = edition
-    ? data.fetchedFor !== surahNumber || data.fetchedEdition !== edition
-    : false;
-  const translations = edition ? data.translations : null;
+  }, [surahNumber, editions]);
 
   return {
-    edition,
-    setEdition,
-    translations,
-    translationLoading: isStale,
+    editions,
+    setEditions,
+    toggleEdition,
+    translationResults: results,
+    translationLoading: loading,
     availableEditions: POPULAR_EDITIONS,
   };
 }
