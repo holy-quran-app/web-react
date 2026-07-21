@@ -16,14 +16,12 @@ const features = [
   },
   {
     title: "Search Ayahs",
-    description:
-      "Find specific verses by keyword, surah name, or ayah number.",
+    description: "Find specific verses by keyword, surah name, or ayah number.",
     href: "/surah",
   },
   {
     title: "Dark Mode",
-    description:
-      "Comfortable reading experience in any lighting condition.",
+    description: "Comfortable reading experience in any lighting condition.",
     href: "#",
   },
 ];
@@ -46,7 +44,9 @@ export function HomePage() {
         </p>
         <div className="flex gap-3 pt-4">
           <Button size="lg" asChild>
-            <Link to="/surah">Start Reading</Link>
+            <Link to="/surah" className="font-semibold">
+              Start Reading
+            </Link>
           </Button>
           <Button size="lg" variant="outline" asChild>
             <Link to="/surah">Browse Surahs</Link>

@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/use-theme";
 import { usePinnedAyah } from "@/hooks/use-pinned-ayah";
@@ -7,8 +7,19 @@ export function Header() {
   const { theme, setTheme } = useTheme();
   const { pinnedAyah } = usePinnedAyah();
 
+  const { pathname } = useLocation();
+
   const toggleTheme = () => {
     setTheme(theme === "dark" ? "light" : "dark");
+  };
+
+  const isPathActive = (
+    route: string,
+    options: { exact: boolean } = { exact: false },
+  ) => {
+    const isActive =
+      options.exact ? pathname === route : pathname.includes(route);
+    return isActive ? "bg-accent/60" : "";
   };
 
   return (
@@ -18,34 +29,89 @@ export function Header() {
           <div className="flex h-9 w-9 items-center justify-center">
             <QuranLogo className="h-9 w-9 text-primary" />
           </div>
-          <span className="font-arabic text-lg font-semibold text-primary" dir="rtl" lang="ar">
+          <span
+            className="font-arabic text-lg font-semibold text-primary"
+            dir="rtl"
+            lang="ar"
+          >
             القرآن الكريم
           </span>
         </Link>
 
         <nav className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            className={isPathActive("/", { exact: true })}
+            asChild
+          >
             <Link to="/">Home</Link>
           </Button>
-          <Button variant="ghost" size="sm" asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            className={isPathActive("/surah")}
+            asChild
+          >
             <Link to="/surah">Surahs</Link>
           </Button>
-          <Button variant="ghost" size="sm" asChild className="hidden md:inline-flex">
+          <Button
+            variant="ghost"
+            size="sm"
+            asChild
+            className={["hidden md:inline-flex", isPathActive("/juz")].join(
+              " ",
+            )}
+          >
             <Link to="/juz">Juz</Link>
           </Button>
-          <Button variant="ghost" size="sm" asChild className="hidden md:inline-flex">
+          <Button
+            variant="ghost"
+            size="sm"
+            asChild
+            className={["hidden md:inline-flex", isPathActive("/page")].join(
+              " ",
+            )}
+          >
             <Link to="/page">Pages</Link>
           </Button>
-          <Button variant="ghost" size="sm" asChild className="hidden lg:inline-flex">
+          <Button
+            variant="ghost"
+            size="sm"
+            asChild
+            className={["hidden lg:inline-flex", isPathActive("/hizb")].join(
+              " ",
+            )}
+          >
             <Link to="/hizb">Hizb</Link>
           </Button>
-          <Button variant="ghost" size="sm" asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            className={isPathActive("/bookmarks")}
+            asChild
+          >
             <Link to="/bookmarks">Bookmarks</Link>
           </Button>
-          <Button variant="ghost" size="sm" asChild>
-            <Link to="/search" aria-label="Search">Search</Link>
+          <Button
+            variant="ghost"
+            size="sm"
+            className={isPathActive("/search")}
+            asChild
+          >
+            <Link to="/search" aria-label="Search">
+              Search
+            </Link>
           </Button>
-          <Button variant="ghost" size="sm" asChild className="hidden md:inline-flex">
+          <Button
+            variant="ghost"
+            size="sm"
+            asChild
+            className={[
+              "hidden md:inline-flex",
+              isPathActive("/settings"),
+            ].join(" ")}
+          >
             <Link to="/settings">Settings</Link>
           </Button>
           {pinnedAyah && (
@@ -65,11 +131,9 @@ export function Header() {
             onClick={toggleTheme}
             aria-label="Toggle theme"
           >
-            {theme === "dark" ? (
+            {theme === "dark" ?
               <SunIcon className="h-5 w-5" />
-            ) : (
-              <MoonIcon className="h-5 w-5" />
-            )}
+            : <MoonIcon className="h-5 w-5" />}
           </Button>
         </nav>
       </div>

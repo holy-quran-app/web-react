@@ -6,7 +6,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { useTheme } from "@/hooks/use-theme";
 import { useTajweed } from "@/hooks/use-tajweed";
 import { useReadingSettings } from "@/hooks/use-reading-settings";
@@ -50,6 +55,7 @@ export function SettingsPage() {
                   size="sm"
                   variant={theme === t ? "default" : "outline"}
                   onClick={() => setTheme(t)}
+                  className="border border-transparent"
                 >
                   {t[0].toUpperCase() + t.slice(1)}
                 </Button>
@@ -71,6 +77,7 @@ export function SettingsPage() {
                 size="sm"
                 variant={tajweedEnabled ? "default" : "outline"}
                 onClick={() => setTajweedEnabled(!tajweedEnabled)}
+                className="border border-transparent"
               >
                 {tajweedEnabled ? "Enabled" : "Disabled"}
               </Button>
@@ -82,7 +89,9 @@ export function SettingsPage() {
           <CardHeader className="gap-3 p-5">
             <div>
               <CardTitle className="text-base">Arabic Font Size</CardTitle>
-              <CardDescription>Controls the Quranic script size</CardDescription>
+              <CardDescription>
+                Controls the Quranic script size
+              </CardDescription>
             </div>
             <Select
               value={arabicFontSize}
@@ -114,6 +123,7 @@ export function SettingsPage() {
                 size="sm"
                 variant={showTranslation ? "default" : "outline"}
                 onClick={() => setShowTranslation(!showTranslation)}
+                className="border border-transparent w-18"
               >
                 {showTranslation ? "Visible" : "Hidden"}
               </Button>
@@ -143,12 +153,25 @@ export function SettingsPage() {
               <CardDescription>Available while reading a surah</CardDescription>
             </div>
             <ul className="grid grid-cols-1 gap-1 text-sm text-muted-foreground sm:grid-cols-2">
-              <li><kbd className="rounded border px-1.5">Space</kbd> Play / Pause</li>
-              <li><kbd className="rounded border px-1.5">J</kbd> Next ayah</li>
-              <li><kbd className="rounded border px-1.5">K</kbd> Previous ayah</li>
-              <li><kbd className="rounded border px-1.5">N</kbd> Next surah</li>
-              <li><kbd className="rounded border px-1.5">P</kbd> Previous surah</li>
-              <li><kbd className="rounded border px-1.5">/</kbd> Focus search</li>
+              <li>
+                <kbd className="rounded-sm border px-1.5">Space</kbd> Play /
+                Pause
+              </li>
+              <li>
+                <kbd className="rounded-sm border px-1.5">J</kbd> Next ayah
+              </li>
+              <li>
+                <kbd className="rounded-sm border px-1.5">K</kbd> Previous ayah
+              </li>
+              <li>
+                <kbd className="rounded-sm border px-1.5">N</kbd> Next surah
+              </li>
+              <li>
+                <kbd className="rounded-sm border px-1.5">P</kbd> Previous surah
+              </li>
+              <li>
+                <kbd className="rounded-sm border px-1.5">/</kbd> Focus search
+              </li>
             </ul>
           </CardHeader>
         </Card>
