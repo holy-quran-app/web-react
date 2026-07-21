@@ -210,8 +210,12 @@ export function AyahCard({
             {tajweedHtml ? (
               <p
                 className={cn(
-                  "flex-1 text-right font-arabic leading-[2.5]",
+                  "flex-1 text-right font-arabic",
                   arabicClassName ?? "text-2xl md:text-3xl",
+                  // Keep line-height last so tailwind-merge doesn't drop it in
+                  // favor of the text-size utility's bundled line-height, which
+                  // would cram the Arabic diacritics into overlapping lines.
+                  "leading-[2.5]",
                 )}
                 dir="rtl"
                 lang="ar"
@@ -221,8 +225,12 @@ export function AyahCard({
             ) : (
               <p
                 className={cn(
-                  "flex-1 text-right font-arabic leading-[2.5]",
+                  "flex-1 text-right font-arabic",
                   arabicClassName ?? "text-2xl md:text-3xl",
+                  // Keep line-height last so tailwind-merge doesn't drop it in
+                  // favor of the text-size utility's bundled line-height, which
+                  // would cram the Arabic diacritics into overlapping lines.
+                  "leading-[2.5]",
                 )}
                 dir="rtl"
                 lang="ar"
