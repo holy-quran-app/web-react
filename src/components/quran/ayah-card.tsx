@@ -2,7 +2,12 @@ import { type ReactNode, useMemo } from "react";
 import { Play, Pause, Loader2, BookOpen, Pin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { parseTajweedMarkup } from "@/lib/tajweed-parser";
 import type { Ayah, TranslationEdition } from "@/types/quran";
@@ -36,7 +41,12 @@ interface AyahCardProps {
 function hizbQuarterLabel(quarter: number): string {
   const hizbNumber = Math.ceil(quarter / 4);
   const pos = ((quarter - 1) % 4) + 1;
-  const posLabels = ["1st quarter", "2nd quarter", "3rd quarter", "4th quarter"];
+  const posLabels = [
+    "1st quarter",
+    "2nd quarter",
+    "3rd quarter",
+    "4th quarter",
+  ];
   return `Hizb ${hizbNumber} (${posLabels[pos - 1]})`;
 }
 
@@ -120,9 +130,9 @@ export function AyahCard({
           <div
             className={cn(
               "flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold",
-              isActive
-                ? "bg-primary text-primary-foreground"
-                : "bg-primary/10 text-primary",
+              isActive ?
+                "bg-primary text-primary-foreground"
+              : "bg-primary/10 text-primary",
             )}
           >
             {ayah.numberInSurah}
@@ -138,24 +148,21 @@ export function AyahCard({
               }
             }}
             aria-label={
-              isLoading
-                ? "Loading"
-                : isCurrentlyPlaying
-                  ? `Pause ayah ${ayah.numberInSurah}`
-                  : `Play ayah ${ayah.numberInSurah}`
+              isLoading ? "Loading"
+              : isCurrentlyPlaying ?
+                `Pause ayah ${ayah.numberInSurah}`
+              : `Play ayah ${ayah.numberInSurah}`
             }
             className={cn(
               "text-muted-foreground hover:text-primary",
               isActive && "text-primary",
             )}
           >
-            {isLoading ? (
+            {isLoading ?
               <Loader2 className="size-3 animate-spin" />
-            ) : isCurrentlyPlaying ? (
+            : isCurrentlyPlaying ?
               <Pause className="size-3" />
-            ) : (
-              <Play className="size-3" />
-            )}
+            : <Play className="size-3" />}
           </Button>
           {onTogglePin && (
             <Button
@@ -164,13 +171,11 @@ export function AyahCard({
               onClick={onTogglePin}
               aria-label={isPinned ? "Unpin ayah" : "Pin ayah"}
               className={cn(
-                "text-muted-foreground hover:text-accent",
-                isPinned && "text-accent",
+                "text-muted-foreground hover:text-sidebar-primary",
+                isPinned && "text-sidebar-primary",
               )}
             >
-              <Pin
-                className={cn("size-3", isPinned && "fill-current")}
-              />
+              <Pin className={cn("size-3", isPinned && "fill-current")} />
             </Button>
           )}
           {leftSlot}
@@ -181,14 +186,14 @@ export function AyahCard({
                   <div
                     className={cn(
                       "flex h-6 w-6 items-center justify-center rounded-full",
-                      isSajdaObligatory(ayah)
-                        ? "bg-red-500/15 text-red-600 dark:text-red-400"
-                        : "bg-amber-500/15 text-amber-600 dark:text-amber-400",
+                      isSajdaObligatory(ayah) ?
+                        "bg-red-500/15 text-red-600 dark:text-red-400"
+                      : "bg-amber-500/15 text-amber-600 dark:text-amber-400",
                     )}
                     aria-label={
-                      isSajdaObligatory(ayah)
-                        ? "Obligatory Sajda (prostration)"
-                        : "Recommended Sajda (prostration)"
+                      isSajdaObligatory(ayah) ?
+                        "Obligatory Sajda (prostration)"
+                      : "Recommended Sajda (prostration)"
                     }
                   >
                     <SajdaIcon className="size-3.5" />
@@ -196,9 +201,9 @@ export function AyahCard({
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>
-                    {isSajdaObligatory(ayah)
-                      ? "Obligatory Sajda"
-                      : "Recommended Sajda"}
+                    {isSajdaObligatory(ayah) ?
+                      "Obligatory Sajda"
+                    : "Recommended Sajda"}
                   </p>
                 </TooltipContent>
               </Tooltip>
@@ -207,7 +212,7 @@ export function AyahCard({
         </div>
         <div className="flex min-w-0 flex-1 flex-col gap-2">
           <div className="flex items-start justify-between gap-2">
-            {tajweedHtml ? (
+            {tajweedHtml ?
               <p
                 className={cn(
                   "flex-1 text-right font-arabic",
@@ -222,8 +227,7 @@ export function AyahCard({
                 data-tajweed=""
                 dangerouslySetInnerHTML={{ __html: tajweedHtml }}
               />
-            ) : (
-              <p
+            : <p
                 className={cn(
                   "flex-1 text-right font-arabic",
                   arabicClassName ?? "text-2xl md:text-3xl",
@@ -237,7 +241,7 @@ export function AyahCard({
               >
                 {ayah.text}
               </p>
-            )}
+            }
             {rightSlot && <div className="shrink-0">{rightSlot}</div>}
           </div>
           {showTranslation && translations && translations.length > 0 && (
@@ -247,7 +251,10 @@ export function AyahCard({
                   t.text && (
                     <div
                       key={t.edition.identifier}
-                      className={cn("leading-relaxed", translationClassName ?? "text-sm")}
+                      className={cn(
+                        "leading-relaxed",
+                        translationClassName ?? "text-sm",
+                      )}
                     >
                       {translations.length > 1 && (
                         <p className="text-[11px] font-medium uppercase tracking-wide text-primary/70">

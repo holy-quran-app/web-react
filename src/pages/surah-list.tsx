@@ -106,14 +106,13 @@ export function SurahListPage() {
         </div>
       </div>
 
-      {loading ? (
+      {loading ?
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 12 }).map((_, i) => (
             <Skeleton key={i} className="h-24 rounded-lg" />
           ))}
         </div>
-      ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      : <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((surah) => (
             <Link key={surah.number} to={`/surah/${surah.number}`}>
               <Card className="transition-all hover:shadow-md hover:border-primary/30">
@@ -127,7 +126,8 @@ export function SurahListPage() {
                     </CardTitle>
                     <CardDescription className="text-xs">
                       {surah.englishNameTranslation} &middot;{" "}
-                      {surah.numberOfAyahs} Ayahs &middot; {surah.revelationType}
+                      {surah.numberOfAyahs} Ayahs &middot;{" "}
+                      {surah.revelationType}
                     </CardDescription>
                   </div>
                   <span className="font-arabic text-xl text-primary">
@@ -138,7 +138,7 @@ export function SurahListPage() {
             </Link>
           ))}
         </div>
-      )}
+      }
     </div>
   );
 }
@@ -158,7 +158,10 @@ function Chip({
       variant={active ? "default" : "outline"}
       size="sm"
       onClick={onClick}
-      className={cn("h-8 rounded-full px-3", active && "shadow-sm")}
+      className={cn(
+        "h-8 rounded-full border border-transparent px-3",
+        active && "shadow-sm",
+      )}
     >
       {children}
     </Button>

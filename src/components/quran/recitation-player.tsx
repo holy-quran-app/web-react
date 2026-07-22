@@ -125,36 +125,33 @@ export function RecitationPlayer({
                     onClick={isActive ? onTogglePlayPause : onPlaySurah}
                     disabled={isLoading}
                     aria-label={
-                      isLoading
-                        ? "Loading"
-                        : isPlaying
-                          ? "Pause"
-                          : isActive
-                            ? "Resume"
-                            : hasRange
-                              ? "Play Range"
-                              : "Play Surah"
+                      isLoading ? "Loading"
+                      : isPlaying ?
+                        "Pause"
+                      : isActive ?
+                        "Resume"
+                      : hasRange ?
+                        "Play Range"
+                      : "Play Surah"
                     }
                   >
-                    {isLoading ? (
-                      <Loader2 className="size-5 animate-spin" />
-                    ) : isPlaying ? (
-                      <Pause className="size-5" />
-                    ) : (
-                      <Play className="size-5" />
-                    )}
+                    {isLoading ?
+                      <Loader2 className="size-5 animate-spin stroke-white" />
+                    : isPlaying ?
+                      <Pause className="size-5  fill-white stroke-transparent" />
+                    : <Play className="size-5 fill-white stroke-transparent" />}
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  {isLoading
-                    ? "Loading..."
-                    : isPlaying
-                      ? "Pause"
-                      : isActive
-                        ? "Resume"
-                        : hasRange
-                          ? "Play Range"
-                          : "Play Surah"}
+                  {isLoading ?
+                    "Loading..."
+                  : isPlaying ?
+                    "Pause"
+                  : isActive ?
+                    "Resume"
+                  : hasRange ?
+                    "Play Range"
+                  : "Play Surah"}
                 </TooltipContent>
               </Tooltip>
 
@@ -171,9 +168,7 @@ export function RecitationPlayer({
                         onPlayAyah(currentAyahIndex + 1);
                       }
                     }}
-                    disabled={
-                      !isActive || currentAyahIndex === totalAyahs - 1
-                    }
+                    disabled={!isActive || currentAyahIndex === totalAyahs - 1}
                     aria-label="Next ayah"
                   >
                     <SkipForward className="size-4" />
@@ -252,9 +247,9 @@ export function RecitationPlayer({
                 min={1}
                 max={totalAyahs}
                 value={
-                  rangeRepeat.startIndex !== null
-                    ? rangeRepeat.startIndex + 1
-                    : ""
+                  rangeRepeat.startIndex !== null ?
+                    rangeRepeat.startIndex + 1
+                  : ""
                 }
                 placeholder="1"
                 onChange={(e) => {
@@ -280,9 +275,7 @@ export function RecitationPlayer({
                 min={1}
                 max={totalAyahs}
                 value={
-                  rangeRepeat.endIndex !== null
-                    ? rangeRepeat.endIndex + 1
-                    : ""
+                  rangeRepeat.endIndex !== null ? rangeRepeat.endIndex + 1 : ""
                 }
                 placeholder={String(totalAyahs)}
                 onChange={(e) => {
