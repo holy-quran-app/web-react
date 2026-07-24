@@ -10,6 +10,7 @@ import { SurahDetailPage } from "@/pages/surah-detail";
 import { JuzListPage } from "@/pages/juz-list";
 import { PageListPage } from "@/pages/page-list";
 import { HizbListPage } from "@/pages/hizb-list";
+import { MemorizePage } from "@/pages/memorize";
 import { BookmarksPage } from "@/pages/bookmarks";
 import { SearchPage } from "@/pages/search";
 import { SettingsPage } from "@/pages/settings";
@@ -31,6 +32,7 @@ export default function App() {
                   <Route path="juz" element={<JuzListPage />} />
                   <Route path="page" element={<PageListPage />} />
                   <Route path="hizb" element={<HizbListPage />} />
+                  <Route path="memorize" element={<MemorizePage />} />
                   <Route path="bookmarks" element={<BookmarksPage />} />
                   <Route path="search" element={<SearchPage />} />
                   <Route path="settings" element={<SettingsPage />} />

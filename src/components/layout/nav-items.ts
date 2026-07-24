@@ -17,6 +17,7 @@ export interface NavItem {
 export const navItems: NavItem[] = [
   { to: "/", label: "Home", exact: true },
   { to: "/surah", label: "Surahs" },
+  { to: "/memorize", label: "Memorize" },
   { to: "/juz", label: "Juz", desktopClassName: "hidden md:inline-flex" },
   { to: "/page", label: "Pages", desktopClassName: "hidden md:inline-flex" },
   { to: "/hizb", label: "Hizb", desktopClassName: "hidden lg:inline-flex" },
