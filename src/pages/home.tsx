@@ -15,14 +15,15 @@ const features = [
     href: "/surah",
   },
   {
-    title: "Search Ayahs",
-    description: "Find specific verses by keyword, surah name, or ayah number.",
-    href: "/surah",
+    title: "Memorization Tracker",
+    description:
+      "Follow a proven Hifz review method and track your progress each day.",
+    href: "/memorize",
   },
   {
-    title: "Dark Mode",
-    description: "Comfortable reading experience in any lighting condition.",
-    href: "#",
+    title: "Search Ayahs",
+    description: "Find specific verses by keyword, surah name, or ayah number.",
+    href: "/search",
   },
 ];
 
@@ -57,15 +58,14 @@ export function HomePage() {
       {/* Features */}
       <section className="container mx-auto grid gap-6 px-4 pb-20 md:grid-cols-3">
         {features.map((feature) => (
-          <Card
-            key={feature.title}
-            className="transition-shadow hover:shadow-md"
-          >
-            <CardHeader>
-              <CardTitle className="text-lg">{feature.title}</CardTitle>
-              <CardDescription>{feature.description}</CardDescription>
-            </CardHeader>
-          </Card>
+          <Link key={feature.title} to={feature.href}>
+            <Card className="h-full transition-all hover:border-primary/30 hover:shadow-md">
+              <CardHeader>
+                <CardTitle className="text-lg">{feature.title}</CardTitle>
+                <CardDescription>{feature.description}</CardDescription>
+              </CardHeader>
+            </Card>
+          </Link>
         ))}
       </section>
     </div>
