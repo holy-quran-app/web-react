@@ -1,9 +1,15 @@
 import { Link } from "react-router-dom";
-import { Check } from "lucide-react";
+import { Check, StickyNote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { startOfDay, type PlanSection, type SrsRating, type TodayPlan } from "@/lib/memorization";
+import {
+  formatAyahRange,
+  startOfDay,
+  type PlanSection,
+  type SrsRating,
+  type TodayPlan,
+} from "@/lib/memorization";
 import type { MemorizationEntry } from "@/types/memorization";
 
 interface Props {
@@ -119,9 +125,15 @@ function EntryRow({
           {entry.englishName}
         </Link>
         <p className="text-xs text-muted-foreground">
-          {entry.numberOfAyahs} ayahs
+          {formatAyahRange(entry)}
           {kind === "srs" && reviewed && ` · next in ${nextInDays(entry)}`}
         </p>
+        {entry.notes && (
+          <p className="mt-0.5 flex items-start gap-1.5 text-xs text-muted-foreground">
+            <StickyNote className="mt-0.5 size-3 shrink-0" />
+            <span className="min-w-0 truncate">{entry.notes}</span>
+          </p>
+        )}
       </div>
       <span
         className="hidden font-arabic text-lg text-primary sm:block"

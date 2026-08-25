@@ -76,6 +76,36 @@ export function getMethodInfo(id: ReviewMethodId): ReviewMethodInfo {
 }
 
 /* ------------------------------------------------------------------ */
+/* Ayah ranges                                                        */
+/* ------------------------------------------------------------------ */
+
+/** Coerce a from/to pair into a valid 1-based inclusive range within the surah. */
+export function clampAyahRange(
+  from: number,
+  to: number,
+  numberOfAyahs: number,
+): { ayahFrom: number; ayahTo: number } {
+  const f = Math.min(Math.max(1, Math.floor(from) || 1), numberOfAyahs);
+  const t = Math.min(Math.max(f, Math.floor(to) || numberOfAyahs), numberOfAyahs);
+  return { ayahFrom: f, ayahTo: t };
+}
+
+/** Number of ayahs in the entry's tracked portion. */
+export function entryAyahCount(entry: MemorizationEntry): number {
+  return entry.ayahTo - entry.ayahFrom + 1;
+}
+
+export function isFullSurah(entry: MemorizationEntry): boolean {
+  return entry.ayahFrom === 1 && entry.ayahTo === entry.numberOfAyahs;
+}
+
+/** Label for an entry's portion, e.g. "286 ayahs" or "Ayahs 1–40 of 286". */
+export function formatAyahRange(entry: MemorizationEntry): string {
+  if (isFullSurah(entry)) return `${entry.numberOfAyahs} ayahs`;
+  return `Ayahs ${entry.ayahFrom}–${entry.ayahTo} of ${entry.numberOfAyahs}`;
+}
+
+/* ------------------------------------------------------------------ */
 /* Date helpers — all operate in the user's local time zone.          */
 /* ------------------------------------------------------------------ */
 
@@ -127,7 +157,7 @@ export function splitIntoSections(
   const n = Math.min(requested, sorted.length);
   if (n <= 0) return [];
 
-  const total = sorted.reduce((sum, e) => sum + e.numberOfAyahs, 0);
+  const total = sorted.reduce((sum, e) => sum + entryAyahCount(e), 0);
   const target = total / n;
   const groups: MemorizationEntry[][] = Array.from({ length: n }, () => []);
 
@@ -135,7 +165,7 @@ export function splitIntoSections(
   let running = 0;
   for (let idx = 0; idx < sorted.length; idx++) {
     groups[gi].push(sorted[idx]);
-    running += sorted[idx].numberOfAyahs;
+    running += entryAyahCount(sorted[idx]);
 
     const itemsLeft = sorted.length - idx - 1;
     const groupsLeft = n - gi - 1; // sections after the current one, still empty
@@ -285,7 +315,7 @@ export interface MemorizationStats {
 
 export function computeStats(state: MemorizationState, now: number): MemorizationStats {
   const memorized = state.entries.filter((e) => e.status === "memorized");
-  const ayahsMemorized = memorized.reduce((sum, e) => sum + e.numberOfAyahs, 0);
+  const ayahsMemorized = memorized.reduce((sum, e) => sum + entryAyahCount(e), 0);
   return {
     memorizedCount: memorized.length,
     learningCount: state.entries.filter((e) => e.status === "learning").length,

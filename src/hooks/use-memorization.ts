@@ -7,6 +7,7 @@ import type {
 } from "@/types/memorization";
 import {
   applySrsRating,
+  clampAyahRange,
   computeStats,
   computeTodayPlan,
   dayKey,
@@ -26,23 +27,41 @@ const DEFAULT_STATE: MemorizationState = {
   todayReviewed: { day: "", ids: [] },
 };
 
-/** Metadata needed to add a surah to the tracker. */
+/** Metadata needed to add a surah (or a portion of one) to the tracker. */
 export interface AddSurahInput {
   surahNumber: number;
   surahName: string;
   englishName: string;
   numberOfAyahs: number;
+  /** First ayah of the portion; defaults to 1. */
+  ayahFrom?: number;
+  /** Last ayah of the portion; defaults to the whole surah. */
+  ayahTo?: number;
+  notes?: string;
 }
 
 let cachedRaw: string | null = null;
 let cachedValue: MemorizationState = DEFAULT_STATE;
+
+/** Fill in fields added after an entry was persisted (ayah range, notes). */
+function normalizeEntry(entry: MemorizationEntry): MemorizationEntry {
+  return {
+    ...entry,
+    ...clampAyahRange(
+      typeof entry.ayahFrom === "number" ? entry.ayahFrom : 1,
+      typeof entry.ayahTo === "number" ? entry.ayahTo : entry.numberOfAyahs,
+      entry.numberOfAyahs,
+    ),
+    notes: typeof entry.notes === "string" ? entry.notes : "",
+  };
+}
 
 /** Fill in any missing fields so older/partial persisted state stays valid. */
 function normalize(parsed: Partial<MemorizationState> | null): MemorizationState {
   if (!parsed || typeof parsed !== "object") return DEFAULT_STATE;
   return {
     method: parsed.method ?? null,
-    entries: Array.isArray(parsed.entries) ? parsed.entries : [],
+    entries: Array.isArray(parsed.entries) ? parsed.entries.map(normalizeEntry) : [],
     cycleLength:
       typeof parsed.cycleLength === "number" && parsed.cycleLength > 0
         ? parsed.cycleLength
@@ -116,7 +135,16 @@ export function useMemorization() {
       if (cur.entries.some((e) => e.surahNumber === input.surahNumber)) return;
       const ts = Date.now();
       const entry: MemorizationEntry = {
-        ...input,
+        surahNumber: input.surahNumber,
+        surahName: input.surahName,
+        englishName: input.englishName,
+        numberOfAyahs: input.numberOfAyahs,
+        ...clampAyahRange(
+          input.ayahFrom ?? 1,
+          input.ayahTo ?? input.numberOfAyahs,
+          input.numberOfAyahs,
+        ),
+        notes: input.notes?.trim() ?? "",
         status,
         addedAt: ts,
         memorizedAt: status === "memorized" ? ts : null,
@@ -166,6 +194,29 @@ export function useMemorization() {
     [],
   );
 
+  /** Change the tracked ayah portion of an entry (clamped to the surah). */
+  const setAyahRange = useCallback((surahNumber: number, from: number, to: number) => {
+    const cur = getSnapshot();
+    persist({
+      ...cur,
+      entries: cur.entries.map((e) =>
+        e.surahNumber === surahNumber
+          ? { ...e, ...clampAyahRange(from, to, e.numberOfAyahs) }
+          : e,
+      ),
+    });
+  }, []);
+
+  const setNotes = useCallback((surahNumber: number, notes: string) => {
+    const cur = getSnapshot();
+    persist({
+      ...cur,
+      entries: cur.entries.map((e) =>
+        e.surahNumber === surahNumber ? { ...e, notes } : e,
+      ),
+    });
+  }, []);
+
   /** Toggle a checkbox-style review item (SSM / cycle methods). */
   const toggleReviewed = useCallback((surahNumber: number) => {
     const cur = getSnapshot();
@@ -209,6 +260,8 @@ export function useMemorization() {
     addSurah,
     removeSurah,
     setStatus,
+    setAyahRange,
+    setNotes,
     toggleReviewed,
     rate,
     resetAll,

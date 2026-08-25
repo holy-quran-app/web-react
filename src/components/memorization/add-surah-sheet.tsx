@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Check, Plus } from "lucide-react";
+import { Check, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Sheet,
   SheetContent,
@@ -12,6 +13,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import { clampAyahRange } from "@/lib/memorization";
 import type { AddSurahInput } from "@/hooks/use-memorization";
 import type { MemorizationStatus } from "@/types/memorization";
 import type { Surah } from "@/types/quran";
@@ -30,6 +32,7 @@ export function AddSurahSheet({ existingNumbers, onAdd, onRemove, trigger }: Pro
   const [error, setError] = useState(false);
   const [search, setSearch] = useState("");
   const [addAs, setAddAs] = useState<MemorizationStatus>("learning");
+  const [expanded, setExpanded] = useState<number | null>(null);
   const fetchedRef = useRef(false);
 
   // Fetch the surah list lazily, only once the picker is first opened, so
@@ -77,6 +80,7 @@ export function AddSurahSheet({ existingNumbers, onAdd, onRemove, trigger }: Pro
           setError(false);
           setLoading(true);
         }
+        if (!next) setExpanded(null);
         setOpen(next);
       }}
     >
@@ -85,7 +89,7 @@ export function AddSurahSheet({ existingNumbers, onAdd, onRemove, trigger }: Pro
         <SheetHeader className="pb-0">
           <SheetTitle>Add to your memorization</SheetTitle>
           <SheetDescription>
-            Pick the surahs you are learning or have already memorized.
+            Pick a surah — or just the ayahs of it you are working on.
           </SheetDescription>
         </SheetHeader>
 
@@ -127,52 +131,22 @@ export function AddSurahSheet({ existingNumbers, onAdd, onRemove, trigger }: Pro
             </p>
           ) : (
             <ul className="flex flex-col gap-1.5">
-              {filtered.map((surah) => {
-                const added = existingNumbers.has(surah.number);
-                return (
-                  <li
-                    key={surah.number}
-                    className="flex items-center gap-3 rounded-lg border p-2.5"
-                  >
-                    <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary/10 text-xs font-semibold text-primary">
-                      {surah.number}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium">{surah.englishName}</p>
-                      <p className="truncate text-xs text-muted-foreground">
-                        {surah.numberOfAyahs} ayahs · {surah.englishNameTranslation}
-                      </p>
-                    </div>
-                    {added ? (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onRemove(surah.number)}
-                      >
-                        <Check className="size-3.5" /> Added
-                      </Button>
-                    ) : (
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() =>
-                          onAdd(
-                            {
-                              surahNumber: surah.number,
-                              surahName: surah.name,
-                              englishName: surah.englishName,
-                              numberOfAyahs: surah.numberOfAyahs,
-                            },
-                            addAs,
-                          )
-                        }
-                      >
-                        <Plus className="size-3.5" /> Add
-                      </Button>
-                    )}
-                  </li>
-                );
-              })}
+              {filtered.map((surah) => (
+                <SurahRow
+                  key={surah.number}
+                  surah={surah}
+                  added={existingNumbers.has(surah.number)}
+                  expanded={expanded === surah.number}
+                  onExpand={() =>
+                    setExpanded((cur) => (cur === surah.number ? null : surah.number))
+                  }
+                  onRemove={() => onRemove(surah.number)}
+                  onConfirm={(input) => {
+                    onAdd(input, addAs);
+                    setExpanded(null);
+                  }}
+                />
+              ))}
               {filtered.length === 0 && (
                 <p className="py-8 text-center text-sm text-muted-foreground">
                   No surahs match "{search}".
@@ -183,5 +157,131 @@ export function AddSurahSheet({ existingNumbers, onAdd, onRemove, trigger }: Pro
         </div>
       </SheetContent>
     </Sheet>
+  );
+}
+
+function SurahRow({
+  surah,
+  added,
+  expanded,
+  onExpand,
+  onConfirm,
+  onRemove,
+}: {
+  surah: Surah;
+  added: boolean;
+  expanded: boolean;
+  onExpand: () => void;
+  onConfirm: (input: AddSurahInput) => void;
+  onRemove: () => void;
+}) {
+  return (
+    <li className="rounded-lg border">
+      <div className="flex items-center gap-3 p-2.5">
+        <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary/10 text-xs font-semibold text-primary">
+          {surah.number}
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-medium">{surah.englishName}</p>
+          <p className="truncate text-xs text-muted-foreground">
+            {surah.numberOfAyahs} ayahs · {surah.englishNameTranslation}
+          </p>
+        </div>
+        {added ? (
+          <Button variant="outline" size="sm" onClick={onRemove}>
+            <Check className="size-3.5" /> Added
+          </Button>
+        ) : (
+          <Button
+            variant={expanded ? "outline" : "secondary"}
+            size="sm"
+            onClick={onExpand}
+            aria-expanded={expanded}
+          >
+            {expanded ? (
+              <>
+                <X className="size-3.5" /> Cancel
+              </>
+            ) : (
+              <>
+                <Plus className="size-3.5" /> Add
+              </>
+            )}
+          </Button>
+        )}
+      </div>
+
+      {expanded && !added && <AddPortionForm surah={surah} onConfirm={onConfirm} />}
+    </li>
+  );
+}
+
+function AddPortionForm({
+  surah,
+  onConfirm,
+}: {
+  surah: Surah;
+  onConfirm: (input: AddSurahInput) => void;
+}) {
+  const [from, setFrom] = useState("1");
+  const [to, setTo] = useState(String(surah.numberOfAyahs));
+  const [notes, setNotes] = useState("");
+
+  const range = clampAyahRange(Number(from), Number(to), surah.numberOfAyahs);
+  const isFull = range.ayahFrom === 1 && range.ayahTo === surah.numberOfAyahs;
+
+  return (
+    <div className="flex flex-col gap-3 border-t bg-muted/30 p-3">
+      <div className="flex items-end gap-2">
+        <label className="flex-1 text-xs text-muted-foreground">
+          From ayah
+          <Input
+            type="number"
+            min={1}
+            max={surah.numberOfAyahs}
+            value={from}
+            onChange={(e) => setFrom(e.target.value)}
+            className="mt-1 h-8"
+          />
+        </label>
+        <label className="flex-1 text-xs text-muted-foreground">
+          To ayah
+          <Input
+            type="number"
+            min={1}
+            max={surah.numberOfAyahs}
+            value={to}
+            onChange={(e) => setTo(e.target.value)}
+            className="mt-1 h-8"
+          />
+        </label>
+      </div>
+      <label className="text-xs text-muted-foreground">
+        Notes <span className="opacity-70">(optional)</span>
+        <Textarea
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          placeholder="e.g. Ayahs 25–28 need extra repetition"
+          className="mt-1 min-h-14"
+        />
+      </label>
+      <Button
+        size="sm"
+        onClick={() =>
+          onConfirm({
+            surahNumber: surah.number,
+            surahName: surah.name,
+            englishName: surah.englishName,
+            numberOfAyahs: surah.numberOfAyahs,
+            ayahFrom: range.ayahFrom,
+            ayahTo: range.ayahTo,
+            notes,
+          })
+        }
+      >
+        <Plus className="size-3.5" />
+        {isFull ? "Add whole surah" : `Add ayahs ${range.ayahFrom}–${range.ayahTo}`}
+      </Button>
+    </div>
   );
 }
