@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Trash2 } from "lucide-react";
+import { Seo } from "@/components/seo";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useBookmarks } from "@/hooks/use-bookmarks";
@@ -9,6 +10,7 @@ export function BookmarksPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <Seo title="Bookmarks" noindex />
       <div className="mb-6 flex items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Bookmarks</h1>

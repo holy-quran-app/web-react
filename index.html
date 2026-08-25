@@ -3,15 +3,58 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Holy Quran - Read, explore, and reflect upon the Holy Quran online." />
+    <title>Holy Quran — Read, Search & Memorize the Quran Online</title>
+    <meta name="description" content="Read, search, and memorize the Holy Quran online. All 114 Surahs with Arabic text, translations, tajweed highlighting, audio recitation, and a Hifz memorization tracker." />
+    <link rel="canonical" href="https://holy-quran.app/" />
     <meta name="theme-color" content="#1a5c32" />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Holy Quran" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:url" content="https://holy-quran.app/" />
+    <meta property="og:title" content="Holy Quran — Read, Search & Memorize the Quran Online" />
+    <meta property="og:description" content="Read, search, and memorize the Holy Quran online. All 114 Surahs with Arabic text, translations, tajweed highlighting, audio recitation, and a Hifz memorization tracker." />
+    <meta property="og:image" content="https://holy-quran.app/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Holy Quran — read, search, and memorize the Quran online" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Holy Quran — Read, Search & Memorize the Quran Online" />
+    <meta name="twitter:description" content="Read, search, and memorize the Holy Quran online. All 114 Surahs with Arabic text, translations, tajweed highlighting, audio recitation, and a Hifz memorization tracker." />
+    <meta name="twitter:image" content="https://holy-quran.app/og-image.png" />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://api.alquran.cloud" />
     <link
       href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Inter:wght@300..700&display=swap"
       rel="stylesheet"
     />
-    <title>Holy Quran</title>
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Holy Quran",
+        "url": "https://holy-quran.app/",
+        "description": "Read, search, and memorize the Holy Quran online.",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": {
+            "@type": "EntryPoint",
+            "urlTemplate": "https://holy-quran.app/search?q={search_term_string}"
+          },
+          "query-input": "required name=search_term_string"
+        }
+      }
+    </script>
+
     <!-- SPA redirect handler for GitHub Pages -->
     <script>
       (function(l) {

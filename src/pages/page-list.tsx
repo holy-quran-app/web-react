@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Seo } from "@/components/seo";
 import { Button } from "@/components/ui/button";
 
 const TOTAL_PAGES = 604;
@@ -27,6 +28,11 @@ export function PageListPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <Seo
+        title="Browse by Page"
+        description="Read the Holy Quran page by page, following the standard 604-page Mushaf layout."
+        path="/page"
+      />
       <div className="mb-6">
         <h1 className="text-3xl font-bold tracking-tight">Mushaf Pages</h1>
         <p className="text-muted-foreground">Jump to any of the 604 pages</p>

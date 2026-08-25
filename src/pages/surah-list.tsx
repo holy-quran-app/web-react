@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { Seo } from "@/components/seo";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -63,6 +64,11 @@ export function SurahListPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <Seo
+        title="All 114 Surahs"
+        description="Browse all 114 Surahs of the Holy Quran with Arabic names, English translations, revelation type, and verse counts."
+        path="/surah"
+      />
       <div className="mb-8 flex flex-col gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Surahs</h1>

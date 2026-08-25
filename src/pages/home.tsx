@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { Seo } from "@/components/seo";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -30,6 +31,11 @@ const features = [
 export function HomePage() {
   return (
     <div className="flex flex-col">
+      <Seo
+        title="Holy Quran — Read, Search & Memorize the Quran Online"
+        description="Read, search, and memorize the Holy Quran online. All 114 Surahs with Arabic text, translations, tajweed highlighting, audio recitation, and a Hifz memorization tracker."
+        path="/"
+      />
       {/* Hero */}
       <section className="relative flex flex-col items-center justify-center gap-6 px-4 py-20 text-center md:py-32">
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-primary/5 to-transparent" />
