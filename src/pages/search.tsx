@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Loader2, Search as SearchIcon } from "lucide-react";
+import { Seo } from "@/components/seo";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -66,6 +67,11 @@ export function SearchPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <Seo
+        title="Search the Quran"
+        description="Search the Holy Quran for ayahs by keyword and read every match in context with translation."
+        path="/search"
+      />
       <div className="mb-6">
         <h1 className="text-3xl font-bold tracking-tight">Search</h1>
         <p className="text-muted-foreground">

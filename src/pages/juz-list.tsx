@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { Seo } from "@/components/seo";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 // Juz -> first surah/ayah (standard Hafs division)
@@ -38,6 +39,11 @@ const JUZ_STARTS: { juz: number; surah: number; ayah: number; label: string }[] 
 export function JuzListPage() {
   return (
     <div className="container mx-auto px-4 py-8">
+      <Seo
+        title="Browse by Juz"
+        description="Read the Holy Quran by Juz — all 30 parts with Arabic text and translations."
+        path="/juz"
+      />
       <div className="mb-6">
         <h1 className="text-3xl font-bold tracking-tight">Juz</h1>
         <p className="text-muted-foreground">30 parts (ajzāʾ) of the Quran</p>

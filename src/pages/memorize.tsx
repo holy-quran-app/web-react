@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { Seo } from "@/components/seo";
 import { Plus, RotateCcw, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MethodSelector } from "@/components/memorization/method-selector";
@@ -47,6 +48,11 @@ export function MemorizePage() {
 
   return (
     <div className="container mx-auto max-w-4xl px-4 py-8">
+      <Seo
+        title="Memorization Tracker"
+        description="Track your Quran memorization (Hifz) with proven review methods and daily progress tracking."
+        path="/memorize"
+      />
       <div className="mb-6">
         <h1 className="text-3xl font-bold tracking-tight">Memorization Tracker</h1>
         <p className="text-muted-foreground">

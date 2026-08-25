@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
+import { Seo } from "@/components/seo";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -159,6 +160,7 @@ export function SurahDetailPage() {
   if (!surah) {
     return (
       <div className="container mx-auto flex flex-col items-center gap-4 px-4 py-20 text-center">
+        <Seo title="Surah Not Found" noindex />
         <h2 className="text-2xl font-bold">Surah not found</h2>
         <Button asChild>
           <Link to="/surah">Back to Surahs</Link>
@@ -169,6 +171,11 @@ export function SurahDetailPage() {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
+      <Seo
+        title={`Surah ${surah.englishName} (${surah.englishNameTranslation})`}
+        description={`Read Surah ${surah.englishName} (${surah.englishNameTranslation}), chapter ${surah.number} of the Holy Quran, with full Arabic text, English translation, tajweed highlighting, and audio recitation.`}
+        path={`/surah/${surah.number}`}
+      />
       <div className="container mx-auto flex-1 px-4 py-8">
         {/* Surah header */}
         <div className="mb-8 flex flex-col items-center gap-2 text-center">

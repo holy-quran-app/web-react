@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Seo } from "@/components/seo";
 import { Button } from "@/components/ui/button";
 
 const TOTAL_HIZB_QUARTERS = 240;
@@ -29,6 +30,11 @@ export function HizbListPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <Seo
+        title="Browse by Hizb"
+        description="Read the Holy Quran by Hizb — all 60 sections with Arabic text and translations."
+        path="/hizb"
+      />
       <div className="mb-6">
         <h1 className="text-3xl font-bold tracking-tight">Hizb Quarters</h1>
         <p className="text-muted-foreground">

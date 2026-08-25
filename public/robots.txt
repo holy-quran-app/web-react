@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /bookmarks
+Disallow: /settings
+
+Sitemap: https://holy-quran.app/sitemap.xml
