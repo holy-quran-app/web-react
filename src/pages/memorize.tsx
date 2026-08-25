@@ -25,6 +25,8 @@ export function MemorizePage() {
     addSurah,
     removeSurah,
     setStatus,
+    setAyahRange,
+    setNotes,
     toggleReviewed,
     rate,
     resetAll,
@@ -199,6 +201,8 @@ export function MemorizePage() {
                 <MemorizedList
                   entries={state.entries}
                   onSetStatus={setStatus}
+                  onSetAyahRange={setAyahRange}
+                  onSetNotes={setNotes}
                   onRemove={removeSurah}
                 />
                 <div className="mt-3 flex justify-end">

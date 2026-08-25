@@ -13,6 +13,12 @@ export interface MemorizationEntry {
   surahName: string;
   englishName: string;
   numberOfAyahs: number;
+  /** First ayah of the tracked portion (1-based, inclusive). */
+  ayahFrom: number;
+  /** Last ayah of the tracked portion (inclusive); equals `numberOfAyahs` for a full surah. */
+  ayahTo: number;
+  /** Free-form user notes, e.g. weak spots to focus on in future revision. */
+  notes: string;
   status: MemorizationStatus;
   /** Timestamp the surah was added to the tracker. */
   addedAt: number;
